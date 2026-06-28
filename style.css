@@ -1,5 +1,5 @@
 /* ==========================================================================
-   🎨 现代华文学习平台全局样式 - style.css (2026 极致美化国风版)
+   🎨 现代华文学习平台全局样式 - style.css (2026 极致美化国风增强版)
    ========================================================================== */
 
 :root {
@@ -13,6 +13,7 @@
     --input-border: #cbd5e1;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
     --shadow-md: 0 10px 25px rgba(44, 62, 80, 0.05);
+    --quiz-btn-hover: #f5f6fa; /* 选项按钮悬停色 */
 }
 
 /* 🌙 暗黑模式适配 */
@@ -24,6 +25,7 @@
     --input-border: #475569;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
     --shadow-md: 0 10px 25px rgba(0,0,0,0.3);
+    --quiz-btn-hover: #2c2c2c; /* 暗黑模式下的选项悬停色 */
 }
 
 body {
@@ -203,6 +205,17 @@ body {
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
+/* 📝 10道阅读理解选择题动态按钮样式注入 */
+#quizContainer button {
+    background: var(--card-bg) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--input-border) !important;
+}
+
+#quizContainer button:disabled {
+    cursor: not-allowed !important;
+}
+
 /* 📖 课文文章卡片 */
 .article-card {
     width: 100%;
@@ -254,7 +267,7 @@ h1 {
     border-color: #4a5568;
 }
 
-/* 🍊 拼音标注（Ruby）极致互动：默认完全隐藏，滑过/激活时优雅浮现 */
+/* 🍊 拼音标注（Ruby）极致互动 */
 ruby {
     ruby-position: over;
     cursor: pointer;
@@ -273,7 +286,7 @@ ruby:hover, ruby.is-active {
     color: #f39c12;
 }
 
-/* 🙈 核心死命令：默认状态下，全篇所有拼音的透明度都是 0（隐形） */
+/* 🙈 全篇所有拼音默认不显示（隐藏状态） */
 #content rt {
     opacity: 0;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -284,13 +297,13 @@ ruby:hover, ruby.is-active {
     padding-bottom: 5px;
 }
 
-/* 🌟 只有当鼠标指到（hover）或手机点击激活（.is-active）时，拼音才浮现 */
+/* 🌟 只有当鼠标悬停或点击激活时，拼音浮现 */
 #content ruby:hover rt, 
 #content ruby.is-active rt {
     opacity: 1;
 }
 
-/* ✍️ 学生作答输入框：紫色呼吸聚焦光晕 */
+/* ✍️ 学生作答输入框 */
 textarea {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: 1px solid var(--input-border) !important;
@@ -303,19 +316,6 @@ textarea:focus {
     border-color: var(--ai-color) !important;
     box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.15) !important;
     background: var(--card-bg) !important;
-}
-
-/* 🤖 AI 批改结果框：炫酷的蓝紫流光渐变左边框 */
-div[id^="aiBox"] {
-    background: linear-gradient(to right, #f4f9fd, #f9f6fc) !important;
-    border-left: 5px solid transparent !important;
-    border-image: linear-gradient(to bottom, #3498db, #9b59b6) 1 !important;
-    box-shadow: 0 4px 15px rgba(155, 89, 182, 0.05) !important;
-    font-weight: 500;
-}
-
-[data-theme="dark"] div[id^="aiBox"] {
-    background: linear-gradient(to right, #1a242f, #251b2d) !important;
 }
 
 /* 💬 字典词摘气泡弹窗（Popover） */
@@ -380,7 +380,7 @@ div[id^="aiBox"] {
 
 .pop-footer {
     display: flex;
-    justify-content: flex-end;
+    justify flex-end;
     margin-top: 14px;
     padding-top: 10px;
     border-top: 1px solid var(--input-border);
