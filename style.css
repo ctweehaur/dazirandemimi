@@ -13,7 +13,6 @@
     --input-border: #cbd5e1;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
     --shadow-md: 0 10px 25px rgba(44, 62, 80, 0.05);
-    --quiz-btn-hover: #f5f6fa; /* 选项按钮悬停色 */
 }
 
 /* 🌙 暗黑模式适配 */
@@ -25,7 +24,6 @@
     --input-border: #475569;
     --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
     --shadow-md: 0 10px 25px rgba(0,0,0,0.3);
-    --quiz-btn-hover: #2c2c2c; /* 暗黑模式下的选项悬停色 */
 }
 
 body {
@@ -205,17 +203,6 @@ body {
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
 
-/* 📝 10道阅读理解选择题动态按钮样式注入 */
-#quizContainer button {
-    background: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    border: 1px solid var(--input-border) !important;
-}
-
-#quizContainer button:disabled {
-    cursor: not-allowed !important;
-}
-
 /* 📖 课文文章卡片 */
 .article-card {
     width: 100%;
@@ -286,7 +273,7 @@ ruby:hover, ruby.is-active {
     color: #f39c12;
 }
 
-/* 🙈 全篇所有拼音默认不显示（隐藏状态） */
+/* 🙈 全篇所有拼音默认隐藏 */
 #content rt {
     opacity: 0;
     transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -297,25 +284,10 @@ ruby:hover, ruby.is-active {
     padding-bottom: 5px;
 }
 
-/* 🌟 只有当鼠标悬停或点击激活时，拼音浮现 */
+/* 🌟 当鼠标指到（hover）或手机点击激活（.is-active）时拼音浮现 */
 #content ruby:hover rt, 
 #content ruby.is-active rt {
     opacity: 1;
-}
-
-/* ✍️ 学生作答输入框 */
-textarea {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border: 1px solid var(--input-border) !important;
-    background: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    outline: none !important;
-}
-
-textarea:focus {
-    border-color: var(--ai-color) !important;
-    box-shadow: 0 0 0 4px rgba(155, 89, 182, 0.15) !important;
-    background: var(--card-bg) !important;
 }
 
 /* 💬 字典词摘气泡弹窗（Popover） */
@@ -380,7 +352,7 @@ textarea:focus {
 
 .pop-footer {
     display: flex;
-    justify flex-end;
+    justify-content: flex-end;
     margin-top: 14px;
     padding-top: 10px;
     border-top: 1px solid var(--input-border);
@@ -410,6 +382,41 @@ textarea:focus {
     border-right: 8px solid transparent;
     border-top: 8px solid var(--card-bg);
     transform: translateX(-50%);
+}
+
+/* ==========================================================================
+   ✨ 10道阅读理解选择题特制高级动态交互美化样式
+   ========================================================================== */
+.quiz-choice-btn {
+    position: relative;
+    transition: all 0.15s ease !important;
+}
+
+/* 允许用户在点击时有一个轻微的打击感压陷反馈 */
+.quiz-choice-btn:active:not(:disabled) {
+    transform: scale(0.995);
+}
+
+#quizContainer button:disabled {
+    cursor: not-allowed !important;
+}
+
+/* 🌟 日间模式下选中的强效视觉标记 */
+.quiz-choice-btn.selected {
+    background: #f0f8ff !important;
+    border: 2px solid #2980b9 !important; /* 边框加粗至 2px */
+    color: #2980b9 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
+}
+
+/* 🌟 🌙 暗黑模式下选中的强效视觉标记 */
+[data-theme="dark"] .quiz-choice-btn.selected {
+    background: #1a252f !important;      /* 沉稳黑蓝色暗底 */
+    border: 2px solid #3498db !important; /* 科技荧光蓝边框 */
+    color: #5dade2 !important;            /* 浅亮蓝字体 */
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
 }
 
 /* 📱 响应式适配移动端手机 */
