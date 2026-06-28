@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华文智能互动学习阅读器</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="control-panel">
+        <button id="themeToggleBtn" onclick="toggleTheme()">🌓 切换主题</button>
+        <button id="gameToggleBtn" onclick="toggleGameMode()">🎯 生词测试</button>
+    </div>
+
+    <div class="vocab-notebook">
+        <div class="notebook-title">
+            <span>📖 我的生词本</span>
+            <button class="clear-btn" onclick="forceClearNotebook()">清空本子 🗑️</button>
+        </div>
+        <div id="notebookList" class="notebook-list">
+            </div>
+    </div>
+
+    <div id="gameContainer" class="game-container" style="display: none;">
+        <div class="quiz-card">
+            <div id="quizProgress" style="font-size: 14px; color: #7f8c8d; margin-bottom: 5px;"></div>
+            <div id="quizQuestion" class="quiz-question"></div>
+            <div id="quizPinyin" class="quiz-pinyin"></div>
+            <div id="quizOptions" class="quiz-options"></div>
+        </div>
+    </div>
+
+    <div class="article-card">
+        <h1 id="articleTitle">课文加载中...</h1>
+        <div id="content">
+            </div>
+    </div>
+
+    <div id="buddyPopover" class="buddy-popover">
+        <div class="pop-title-row">
+            <span id="popWord" class="pop-title">词</span>
+            <span id="popPinyin" class="pop-pinyin">[pīn yīn]</span>
+        </div>
+        <div class="pop-box pop-en">
+            <span class="pop-tag">EN</span>
+            <span id="popEn">English translation</span>
+        </div>
+        <div class="pop-box pop-bm">
+            <span class="pop-tag">BM</span>
+            <span id="popBm">Terjemahan Melayu</span>
+        </div>
+        <div class="pop-footer">
+            <button class="pop-btn-copy" onclick="saveToNotebook(event)">Copy 📋</button>
+        </div>
+        <div id="popArrow" class="pop-arrow"></div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+    <script src="questions.js"></script>
+</body>
+</html>
