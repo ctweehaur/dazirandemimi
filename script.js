@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 终极多模块稳定版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 延时统一提交最终版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -7,17 +7,18 @@ let saved = JSON.parse(localStorage.getItem('saved_104')) || [];
 let quizData = [];
 let currentQuizIdx = 0;
 let isLocked = false;
+let userSelectedAnswers = {}; // 临时存储学生勾选的每道题目的选项
 
 window.onload = function() {
     // 初始化网页标题
     document.getElementById('articleTitle').innerText = lessonTitle;
     document.title = lessonTitle;
 
-    // 渲染课文、生词本和选择题
+    // 渲染课文基底、生词本和选择题
     if (typeof lessonData !== 'undefined') { 
         render(); 
         renderNB(); 
-        renderMultipleChoiceQuizzes(); // 🚀 核心联动：渲染跨文件读取到的 10 道选择题
+        renderMultipleChoiceQuizzes(); 
     }
     
     // 初始化气泡弹窗事件，点击空白处自动收回激活状态
@@ -28,7 +29,7 @@ window.onload = function() {
     });
 };
 
-// 📖 正文渲染器：完美支持华文首行空两格，且将灰色段号悬浮在左侧白边
+// 📖 正文渲染器：支持华文首行空两格，并将灰色段号悬浮在左侧白边防止排版挤压拼音
 function render() {
     const cnt = document.getElementById('content'); 
     cnt.innerHTML = "";
@@ -85,7 +86,7 @@ function render() {
     finalizeParagraph(p);
 }
 
-// 🎯 选择题渲染器：在文章下方生成选择题，并且确保每次刷新/载入时选项全部重新洗牌
+// 🎯 选择题渲染器：点击选项时仅改变高亮底色，并不当场剧透判定对错
 function renderMultipleChoiceQuizzes() {
     if (typeof quizDataList === 'undefined' || quizDataList.length === 0) return;
     
@@ -93,12 +94,21 @@ function renderMultipleChoiceQuizzes() {
     const container = document.getElementById('quizContainer');
     container.innerHTML = "";
     section.style.display = "block"; 
+    
+    // 初始化清空状态
+    userSelectedAnswers = {};
+    document.getElementById('quizResultScore').style.display = "none";
+    const submitBtn = document.getElementById('submitQuizBtn');
+    submitBtn.disabled = false;
+    submitBtn.style.background = "#34495e";
+    submitBtn.innerText = "提交检查 🚀";
 
     quizDataList.forEach((q) => {
         const qBox = document.createElement('div');
         qBox.style.marginBottom = "25px";
         qBox.style.paddingBottom = "15px";
         qBox.style.borderBottom = "1px dashed #ddd";
+        qBox.setAttribute("data-q-id", q.id);
 
         const qText = document.createElement('div');
         qText.style.fontWeight = "bold";
@@ -109,13 +119,15 @@ function renderMultipleChoiceQuizzes() {
         qBox.appendChild(qText);
 
         const optionsBox = document.createElement('div');
+        optionsBox.className = "options-group";
         
-        // 选项绝对随机洗牌（Shuffle）
+        // 选项彻底随机无序乱序排列（Shuffle）
         let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
         shuffledOptions.forEach(opt => {
             const btn = document.createElement('button');
             btn.innerText = opt;
+            btn.className = "quiz-choice-btn";
             
             btn.style.display = "block";
             btn.style.width = "100%";
@@ -127,27 +139,30 @@ function renderMultipleChoiceQuizzes() {
             btn.style.background = "#fff";
             btn.style.cursor = "pointer";
             btn.style.fontSize = "14px";
-            btn.style.transition = "all 0.2s";
+            btn.style.transition = "all 0.1s";
 
-            // 修复：增加了对 disabled 状态的拦截，防止移入移出重置答错状态
-            btn.onmouseenter = () => { if(!btn.disabled) btn.style.background = "#f5f6fa"; };
-            btn.onmouseleave = () => { if(!btn.disabled) btn.style.background = "#fff"; };
+            btn.onmouseenter = () => { if(!btn.classList.contains('selected') && !btn.disabled) btn.style.background = "#f5f6fa"; };
+            btn.onmouseleave = () => { if(!btn.classList.contains('selected') && !btn.disabled) btn.style.background = "#fff"; };
 
             btn.onclick = () => {
-                const currentLetter = opt.trim().charAt(0); 
-                
-                if (currentLetter === q.answer) {
-                    Array.from(optionsBox.children).forEach(b => b.disabled = true);
-                    btn.style.background = "#2ecc71";
-                    btn.style.color = "white";
-                    btn.style.borderColor = "#2ecc71";
-                    btn.innerText = opt + "  (✓ 正确!)";
-                } else {
-                    btn.style.background = "#e74c3c";
-                    btn.style.color = "white";
-                    btn.style.borderColor = "#e74c3c";
-                    btn.disabled = true; // 直接禁用锁定，onmouseleave 不再会干涉其颜色
-                }
+                // 清除当前题目内其他按钮的选中样式
+                Array.from(optionsBox.children).forEach(b => {
+                    b.classList.remove('selected');
+                    b.style.background = "#fff";
+                    b.style.borderColor = "#dcdde1";
+                    b.style.color = "inherit";
+                    b.style.fontWeight = "normal";
+                });
+
+                // 为点选的按钮赋予柔和的浅蓝色标记
+                btn.classList.add('selected');
+                btn.style.background = "#ebf5fb";
+                btn.style.borderColor = "#3498db";
+                btn.style.color = "#2980b9";
+                btn.style.fontWeight = "600";
+
+                // 录入数据字典缓存
+                userSelectedAnswers[q.id] = opt;
             };
             optionsBox.appendChild(btn);
         });
@@ -157,7 +172,72 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// ==================== 🛠️ 独立字词高精准字典解释弹窗核心逻辑 ============================
+// 🚀 核心全局结算器：一次性批改全卷
+function submitAllAnswers() {
+    const totalQuestions = quizDataList.length;
+    const answeredCount = Object.keys(userSelectedAnswers).length;
+
+    // 拦截漏做漏写的情况
+    if (answeredCount < totalQuestions) {
+        alert(`⚠️ 老师发现你还有未填完的习题哦！目前只完成了 (${answeredCount} / ${totalQuestions}) 题。`);
+        return;
+    }
+
+    let score = 0;
+
+    // 遍历匹配答案
+    quizDataList.forEach(q => {
+        const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
+        const buttons = qBox.querySelectorAll('.quiz-choice-btn');
+        const studentOpt = userSelectedAnswers[q.id];
+        const studentLetter = studentOpt.trim().charAt(0); // 截取字母 (A, B, C, D)
+
+        buttons.forEach(btn => {
+            btn.disabled = true; // 彻底锁死不可修改
+            const btnLetter = btn.innerText.trim().charAt(0);
+
+            btn.style.background = "#fff";
+            btn.style.color = "inherit";
+            btn.style.borderColor = "#dcdde1";
+
+            // 1. 如果是正确的一律变成高亮浅绿
+            if (btnLetter === q.answer) {
+                btn.style.background = "#2ecc71";
+                btn.style.color = "white";
+                btn.style.borderColor = "#2ecc71";
+                if (studentLetter === q.answer) {
+                    btn.innerText = btn.innerText + "  (✓ 答对了)";
+                }
+            }
+            
+            // 2. 如果学生这题选错了，单独把他选错的那项挂红底高亮
+            if (btnLetter === studentLetter && studentLetter !== q.answer) {
+                btn.style.background = "#e74c3c";
+                btn.style.color = "white";
+                btn.style.borderColor = "#e74c3c";
+                btn.innerText = btn.innerText + "  (❌ 你的选择)";
+            }
+        });
+
+        if (studentLetter === q.answer) {
+            score++;
+        }
+    });
+
+    // 显现最终的成绩公告板
+    const resultBox = document.getElementById('quizResultScore');
+    resultBox.style.display = "block";
+    resultBox.innerHTML = `🎉 批改完成！您的最终得分是：<span style="font-size: 24px; color: #e67e22;">${score}</span> / ${totalQuestions} 分`;
+    
+    const submitBtn = document.getElementById('submitQuizBtn');
+    submitBtn.disabled = true;
+    submitBtn.style.background = "#95a5a6";
+    submitBtn.innerText = "已完成提交";
+    
+    resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+// ==================== 🛠️ 独立字词字典解释弹窗定位底层逻辑 ============================
 function openPop(el, i) {
     currentIdx = i; const d = lessonData[i];
     document.getElementById('popWord').innerText = d[0];
