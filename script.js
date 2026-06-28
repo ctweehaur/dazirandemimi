@@ -1,130 +1,97 @@
-// 🧠 核心习题区：支持概述背景卡片，移除 AI 批改，支持直接对答案
-function renderQuestions() {
-    if (typeof lessonQuestions === 'undefined' || lessonQuestions.length === 0) return;
+window.onload = function() {
+    // 初始化网页标题
+    document.getElementById('articleTitle').innerText = lessonTitle;
+    document.title = lessonTitle;
 
-    const cnt = document.getElementById('content');
-    const qCard = document.createElement("div");
-    qCard.style.marginTop = "40px";
-    qCard.style.padding = "25px";
-    qCard.style.borderTop = "2px dashed #bdc3c7";
-    qCard.style.background = "var(--card-bg, #ffffff)";
-    qCard.style.borderRadius = "12px";
+    // 渲染课文、生词本和习题
+    if (typeof lessonData !== 'undefined') { 
+        render(); 
+        renderNB(); 
+        
+        // 🚀 核心联动：渲染跨文件读取到的 10 道选择题并进行随机洗牌
+        renderMultipleChoiceQuizzes(); 
+    }
+    
+    // 初始化气泡弹窗事件
+    document.body.appendChild(document.getElementById('buddyPopover'));
+    document.addEventListener('click', () => { 
+        document.getElementById('buddyPopover').style.display = 'none'; 
+        document.querySelectorAll('ruby').forEach(r => r.classList.remove('is-active'));
+    });
+};
 
-    const qTitle = document.createElement("h2");
-    qTitle.innerText = "📚 课后思考与自测练习";
-    qTitle.style.fontSize = "20px";
-    qTitle.style.color = "#2c3e50";
-    qTitle.style.marginBottom = "20px";
-    qCard.appendChild(qTitle);
+// 🎯 选择题渲染器：在文章下方生成选择题，并且确保每次刷新/载入时选项全部重新洗牌
+function renderMultipleChoiceQuizzes() {
+    if (typeof quizDataList === 'undefined' || quizDataList.length === 0) return;
+    
+    const section = document.getElementById('quizSection');
+    const container = document.getElementById('quizContainer');
+    container.innerHTML = "";
+    section.style.display = "block"; // 显示选择题卡片
 
-    lessonQuestions.forEach((q) => {
-        const qBox = document.createElement("div");
-        qBox.style.marginBottom = "30px";
-        qBox.style.paddingBottom = "20px";
-        qBox.style.borderBottom = "1px dashed #eee";
+    quizDataList.forEach((q) => {
+        const qBox = document.createElement('div');
+        qBox.style.marginBottom = "25px";
+        qBox.style.paddingBottom = "15px";
+        qBox.style.borderBottom = "1px dashed #ddd";
 
-        const qText = document.createElement("div");
-        qText.innerHTML = `<strong>${q.number}</strong> ${q.question} <span style="color:#e74c3c; font-weight:bold;">[${q.score}分]</span>`;
+        // 题目文本（支持换行符）
+        const qText = document.createElement('div');
+        qText.style.fontWeight = "bold";
         qText.style.fontSize = "16px";
+        qText.style.marginBottom = "10px";
+        qText.style.color = "#2c3e50";
+        qText.innerHTML = `${q.id}. ${q.question.replace(/\n/g, '<br>')}`;
         qBox.appendChild(qText);
 
-        // 如果题目配有 context 背景文本（如概述题），在前端生成高质感的紫色引用卡片
-        if (q.context) {
-            const contextBox = document.createElement("div");
-            contextBox.innerHTML = q.context.replace(/\n/g, '<br>');
-            contextBox.style.background = "#f8f9fa";
-            contextBox.style.borderLeft = "4px solid #9b59b6";
-            contextBox.style.padding = "15px";
-            contextBox.style.margin = "12px 0";
-            contextBox.style.fontSize = "15px";
-            contextBox.style.color = "#34495e";
-            contextBox.style.lineHeight = "1.6";
-            contextBox.style.borderRadius = "4px";
-            qBox.appendChild(contextBox);
-        }
+        const optionsBox = document.createElement('div');
+        
+        // 🌟 选项绝对随机洗牌（Shuffle）
+        let shuffledOptions = [...q.options].sort(() => Math.random() - 0.5);
 
-        const textarea = document.createElement("textarea");
-        textarea.placeholder = (q.type && q.type === "summary") ? "请在此处输入您的概述答案（注意不超过60字）..." : "请在此处输入您的答案...";
-        textarea.style.width = "100%";
-        textarea.style.height = (q.type && q.type === "summary") ? "110px" : "80px";
-        textarea.style.padding = "10px";
-        textarea.style.marginTop = "10px";
-        textarea.style.boxSizing = "border-box";
-        textarea.style.borderRadius = "6px";
-        textarea.style.border = "1px solid #ccc";
-        textarea.style.fontSize = "15px";
-        textarea.style.fontFamily = "inherit";
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.innerText = opt;
+            
+            // 样式美化组件
+            btn.style.display = "block";
+            btn.style.width = "100%";
+            btn.style.textAlign = "left";
+            btn.style.margin = "6px 0";
+            btn.style.padding = "10px 15px";
+            btn.style.border = "1px solid #dcdde1";
+            btn.style.borderRadius = "6px";
+            btn.style.background = "#fff";
+            btn.style.cursor = "pointer";
+            btn.style.fontSize = "14px";
+            btn.style.transition = "all 0.2s";
 
-        textarea.value = localStorage.getItem(`ans_${q.id}`) || "";
-        qBox.appendChild(textarea);
+            btn.onmouseenter = () => { if(!btn.disabled) btn.style.background = "#f5f6fa"; };
+            btn.onmouseleave = () => { if(!btn.disabled && !btn.classList.contains('wrong')) btn.style.background = "#fff"; };
 
-        const controlRow = document.createElement("div");
-        controlRow.style.display = "flex";
-        controlRow.style.justify = "space-between";
-        controlRow.style.alignItems = "center";
-        controlRow.style.marginTop = "8px";
-
-        const counter = document.createElement("div");
-        counter.style.fontSize = "13px";
-        counter.style.color = "#7f8c8d";
-        if (q.type && q.type === "summary") {
-            counter.innerHTML = `当前字数：<span id="charCount_${q.id}">0</span> / 60 字`;
-        }
-        controlRow.appendChild(counter);
-
-        const btnGroup = document.createElement("div");
-
-        const submitBtn = document.createElement("button");
-        submitBtn.innerText = "查看满分答案 📋";
-        submitBtn.style.padding = "6px 12px";
-        submitBtn.style.background = "#2ecc71";
-        submitBtn.style.color = "white";
-        submitBtn.style.border = "none";
-        submitBtn.style.borderRadius = "4px";
-        submitBtn.style.cursor = "pointer";
-        submitBtn.style.fontSize = "13px";
-        btnGroup.appendChild(submitBtn);
-
-        controlRow.appendChild(btnGroup);
-        qBox.appendChild(controlRow);
-
-        const ansBox = document.createElement("div");
-        ansBox.style.display = "none";
-        ansBox.style.marginTop = "15px";
-        ansBox.style.padding = "12px";
-        ansBox.style.background = "#fff9db";
-        ansBox.style.borderLeft = "4px solid #f1c40f";
-        ansBox.style.borderRadius = "4px";
-        ansBox.style.fontSize = "14px";
-        ansBox.innerHTML = `<strong>💡 满分答案：</strong><br><div style="margin-top:6px; color:#2c3e50; font-weight:500;">${q.modelAnswer}</div>`;
-        qBox.appendChild(ansBox);
-
-        submitBtn.onclick = function() {
-            ansBox.style.display = ansBox.style.display === "none" ? "block" : "none";
-            submitBtn.innerText = ansBox.style.display === "block" ? "收起满分答案 ❌" : "查看满分答案 📋";
-        };
-
-        function updateCharCount() {
-            if (q.type && q.type === "summary") {
-                const text = textarea.value;
-                const matched = text.match(/[\u4e00-\u9fa5\w\d\u3000-\u303f\uff00-\uffef]/g);
-                const count = matched ? matched.length : 0;
-                const countEl = document.getElementById(`charCount_${q.id}`);
-                if (countEl) {
-                    countEl.innerText = count;
-                    countEl.style.color = count > 60 ? "#e74c3c" : "#27ae60";
+            // 点击即时比对判定逻辑
+            btn.onclick = () => {
+                const currentLetter = opt.trim().charAt(0); // 抓取选项开头的 A, B, C, D
+                
+                if (currentLetter === q.answer) {
+                    // 答对：锁定本题所有选项，当前选项变绿
+                    Array.from(optionsBox.children).forEach(b => b.disabled = true);
+                    btn.style.background = "#2ecc71";
+                    btn.style.color = "white";
+                    btn.style.borderColor = "#2ecc71";
+                    btn.innerText = opt + "  (✓ 正确!)";
+                } else {
+                    // 答错：当前按钮变红并锁定（允许继续猜其他选项）
+                    btn.style.background = "#e74c3c";
+                    btn.style.color = "white";
+                    btn.style.borderColor = "#e74c3c";
+                    btn.disabled = true;
                 }
-            }
-        }
+            };
+            optionsBox.appendChild(btn);
+        });
 
-        textarea.oninput = function() {
-            localStorage.setItem(`ans_${q.id}`, textarea.value);
-            updateCharCount();
-        };
-        setTimeout(updateCharCount, 100);
-
-        qCard.appendChild(qBox);
+        qBox.appendChild(optionsBox);
+        container.appendChild(qBox);
     });
-
-    cnt.appendChild(qCard);
 }
