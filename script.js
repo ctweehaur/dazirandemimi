@@ -231,7 +231,7 @@ function submitAllAnswers() {
                 btn.style.color = "white";
                 btn.style.borderColor = "#2ecc71";
                 if (studentLetter === q.answer) {
-                    btn.innerText = btn.innerText + "  (✓ 答对了)";
+                    btn.innerText = btn.innerText + "  (✅️)";
                 }
             }
             
@@ -240,7 +240,7 @@ function submitAllAnswers() {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
                 btn.style.borderColor = "#e74c3c";
-                btn.innerText = btn.innerText + "  (❌ 你的选择)";
+                btn.innerText = btn.innerText + "  (❌️)";
             }
         });
 
