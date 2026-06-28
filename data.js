@@ -160,7 +160,7 @@ const lessonData = [
     ["的", "de", "particle", "yang"],
     ["我们", "wǒ men", "we", "kami"],
     ["没有", "méi yǒu", "did not", "tidak"],
-    ["怠慢", "dài màn", "slacken / delay / slack off", "lengah / melengah-lengahkan masa"],
+    ["怠慢", "dài慢", "slacken / delay / slack off", "lengah / melengah-lengahkan masa"],
     ["，", "", "", ""],
     ["稍", "shāo", "slightly / a bit", "sedikit / seketika"],
     ["休息", "xiū xi", "rest", "berehat"],
@@ -201,6 +201,7 @@ const lessonData = [
     ["头", "tóu", "head", "kepala"],
     ["探出", "tàn chū", "poke out / stick out", "menjenguk keluar / mengeluarkan"],
     ["巢穴", "cháo xué", "nest / lair", "sarang"],
+    ["巢口", "", "", ""], // 👈 纯文字标点处理
     ["儿", "r", "suffix particle", ""],
     ["，", "", "", ""],
     ["却", "què", "but / however", "tetapi / namun"],
@@ -293,7 +294,7 @@ const lessonData = [
     ["！", "", "", ""],
     ["”", "", "", ""],
     ["，", "", "", ""],
-    ["然后", "rán hòu", "then", "kemudian / lalu"],
+    ["then", "rán hòu", "then", "kemudian / lalu"],
     ["转头", "zhuǎn tóu", "turned head around", "memalingkan muka / menoleh"],
     ["再", "zài", "again", "lagi"],
     ["向着", "xiàng zhe", "towards / facing", "menghadap ke arah / kepada"],
@@ -301,7 +302,7 @@ const lessonData = [
     ["道", "dào", "said", "berkata"],
     ["：", "", "", ""],
     ["“", "", "", ""],
-    ["还是", "hái shì", "or / had better", "atau / agaknya"],
+    ["还是", "hái sì", "or / had better", "atau / agaknya"],
     ["你们", "nǐ men", "you all", "kamu semua"],
     ["谁", "shéi", "who / anyone", "sesiapa"],
     ["有主意", "yǒu zhǔ yi", "has an idea / plan", "ada idea / cadangan"],
@@ -363,7 +364,7 @@ const lessonData = [
     ["“", "", "", ""],
     ["见死不救", "jiàn sǐ bú jiù", "refuse to help in a crisis", "melihat orang susah tanpa membantu / lepas tangan"],
     ["”", "", "", ""],
-    ["的", "de", "particle", "punya"],
+    ["的", "de", "particle", "yang"],
     ["议论", "yì lùn", "discussion / criticism", "bincangan / rungutan / ulasan"],
     ["和", "hé", "and", "dan"],
     ["抗议", "kàng yì", "protest", "bantahan"],
@@ -558,7 +559,6 @@ const lessonData = [
     ["迫不及待", "pò bù jí dài", "impatient / cannot wait", "tidak sabar-sabar / tergesa-gesa"],
     ["往外", "wǎng wài", "outwards", "ke luar"],
     ["爬", "pá", "crawl", "merangkak"],
-    ["处理", "", "", ""],
     ["。", "", "", ""],
 
     ["\n", "", "", ""], // 👈 第 10 段
@@ -643,7 +643,7 @@ const lessonData = [
     ["海鸥", "hǎi ōu", "seagulls", "burung camar"],
     ["、", "", "", ""],
     ["鲣鸟", "jiān niǎo", "boobies (type of bird)", "burung dendang laut / booby"],
-    ["的", "de", "particle", "punya"],
+    ["的", "de", "particle", "yang"],
     ["腹中", "fù zhōng", "inside stomach", "dalam perut"],
     ["食物", "shí wù", "food", "makanan"],
     ["。", "", "", ""],
@@ -822,7 +822,8 @@ const lessonData = [
     ["不会", "bú huì", "will not", "tidak akan"],
     ["受到", "shòu dào", "receive / suffer", "menerima / mengalami"],
     ["伤害", "shāng hài", "harm / injury", "kecederaan / kemudaratan / kebinasaan"],
-    ["。", "”", "", ""],
+    ["。", "", "", ""],
+    ["”", "", "", ""], // 👈 完美并入下引号
 
     ["\n", "", "", ""], // 👈 第 15 段
 
