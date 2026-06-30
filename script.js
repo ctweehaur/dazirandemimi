@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 绿圈提示完美修复版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 答对无绿圈纯净版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -180,7 +180,6 @@ function renderMultipleChoiceQuizzes() {
             btn.innerText = finalOptText;
             btn.className = "quiz-choice-btn";
             
-            // 🛠️ 修复点1：确保完全匹配原始的 A B C D 文本录入给 data 属性
             const originalMatch = q.options.find(o => o.replace(/^[A-D]\s+/, "") === content);
             btn.setAttribute("data-original-text", originalMatch || finalOptText);
 
@@ -276,7 +275,7 @@ function submitAndShowWrongOnly() {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不污染背景
+            // 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不再有任何额外边框渲染
             if (btn === selectedBtn && studentLetter === q.answer) {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
@@ -306,6 +305,7 @@ function submitAndShowWrongOnly() {
     resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+// 重新作答
 function retryQuizAnswers() {
     renderMultipleChoiceQuizzes();
     document.getElementById('quizResultScore').style.display = "none";
@@ -325,11 +325,10 @@ function revealRealCorrectAnswers() {
 
         buttons.forEach(btn => {
             const btnOriginalText = btn.getAttribute("data-original-text");
-            // 🛠️ 修复点2：增加兜底抓取，确保不管怎么乱序都能精准捕捉到前缀开头的字母 (A/B/C/D)
             const btnLetter = btnOriginalText ? btnOriginalText.trim().charAt(0) : btn.innerText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 清洗机制：先洗干净文本后缀，防重复叠加
+                // 清洗机制：先洗干净文本后缀，防重复
                 let currentText = btn.innerText;
                 currentText = currentText.replace("  (✅)", "").replace(" (✅)", "");
                 
@@ -337,16 +336,12 @@ function revealRealCorrectAnswers() {
                 btn.innerText = currentText + "  (✅)";
                 btn.style.fontWeight = "bold";
                 
-                // 🚀 精准激活：为正确选项添加类名，强制触发 style.css 里的淡淡绿圈样式！
-                btn.classList.add('correct-answer-hint');
+                // 💡 彻底清爽：这里移除了任何 correct-answer-hint 类名的添加！
+                // 答对的题目会完全保持原本选中的状态，绝不再亮起绿圈
             }
         });
     });
     document.getElementById('showCorrectBtn').style.display = "none";
-}
-
-function submitAllAnswers() {
-    submitAndShowWrongOnly();
 }
 
 // ==================== 🛠 *字词字典弹窗核心逻辑 ============================
