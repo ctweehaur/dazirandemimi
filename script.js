@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 文本赏析高级版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 文本赏析外部解耦版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -30,14 +30,14 @@ window.onload = function() {
     });
 };
 
-// 📖 正文渲染器：支持华文首行空两格，支持显示深度文本赏析
+// 📖 正文渲染器：支持华文首行空两格，并为深度文本赏析预留 DOM 节点
 function render() {
     const cnt = document.getElementById('content'); 
     cnt.innerHTML = "";
     let pNum = 1; 
     let p = document.createElement("p"); 
     
-    // 渲染课文顶部的全局赏析
+    // 渲染课文顶部的全局总览赏析板
     const topAnalysis = document.getElementById('teacherArticleAnalysis');
     if (topAnalysis) {
         if (isTeacherMode && typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.overview) {
@@ -77,9 +77,10 @@ function render() {
             paragraphElement.insertBefore(s, paragraphElement.firstChild); 
             cnt.appendChild(paragraphElement);
 
-            // 👁️ 赏析模式下：插入当前段落的深度分析面板
-            if (isTeacherMode && typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
+            // 👁️ 赏析节点预渲染：为每一段注入一个带独立 ID 的赏析容器，初始根据状态显隐
+            if (typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
                 let pAnalysis = document.createElement("div");
+                pAnalysis.id = `p-analysis-${pNum}`;
                 pAnalysis.className = "teacher-p-analysis";
                 pAnalysis.style.background = "#faf5ff";
                 pAnalysis.style.borderLeft = "3px solid #af7ac5";
@@ -90,6 +91,9 @@ function render() {
                 pAnalysis.style.borderRadius = "4px";
                 pAnalysis.style.textIndent = "0";
                 pAnalysis.innerHTML = `<strong>🔍 第 ${pNum} 段文本赏析：</strong>${lessonTeacherAnalysis.paragraphs[pNum]}`;
+                
+                // 根据当前的赏析开关状态决定是否显示
+                pAnalysis.style.display = isTeacherMode ? "block" : "none";
                 cnt.appendChild(pAnalysis);
             }
 
@@ -116,7 +120,7 @@ function render() {
     finalizeParagraph(p);
 }
 
-// 🎯 选择题渲染器：支持显示问题赏析/设题意图
+// 🎯 选择题渲染器：支持动态读取 questions.js 里的问题赏析
 function renderMultipleChoiceQuizzes() {
     if (typeof quizDataList === 'undefined' || quizDataList.length === 0) return;
     
@@ -152,9 +156,10 @@ function renderMultipleChoiceQuizzes() {
         qText.innerHTML = `${q.id}. ${q.question.replace(/\n/g, '<br>')}`;
         qBox.appendChild(qText);
 
-        // 👁️ 赏析模式下：在题干下方渲染本题的解析和引导思考
-        if (isTeacherMode && q.teacherAnalysis) {
+        // 👁️ 题目分析节点预渲染：为每道题生成独立的赏析板容器
+        if (q.teacherAnalysis) {
             let qAnalysis = document.createElement("div");
+            qAnalysis.id = `q-analysis-${q.id}`;
             qAnalysis.style.background = "#faf5ff";
             qAnalysis.style.borderLeft = "3px solid #af7ac5";
             qAnalysis.style.padding = "8px 12px";
@@ -163,6 +168,8 @@ function renderMultipleChoiceQuizzes() {
             qAnalysis.style.color = "#6c3483";
             qAnalysis.style.borderRadius = "4px";
             qAnalysis.innerHTML = `<strong>📐 设题意图与核心考点：</strong>${q.teacherAnalysis}`;
+            
+            qAnalysis.style.display = isTeacherMode ? "block" : "none";
             qBox.appendChild(qAnalysis);
         }
 
@@ -228,11 +235,12 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板
+// 👁️ 控制开关：切换文本赏析面板的显示与隐藏（实现原地展开、原地收起）
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
     
+    // 1. 改变按钮的外观样式
     if (isTeacherMode) {
         btn.innerText = "❌ 关闭文本赏析";
         btn.style.background = "#7d3c98";
@@ -241,9 +249,25 @@ function toggleTeacherMode() {
         btn.style.background = "#9b59b6";
     }
     
-    // 重新渲染页面
-    render();
-    renderMultipleChoiceQuizzes();
+    // 2. 控制课文顶部大赏析板的显隐
+    const topAnalysis = document.getElementById('teacherArticleAnalysis');
+    if (topAnalysis) {
+        topAnalysis.style.display = isTeacherMode ? "block" : "none";
+    }
+
+    // 3. 循环批量切换正文各段赏析板的 display 状态（绝不重绘大树，体验极佳）
+    const pPanels = document.querySelectorAll('.teacher-p-analysis');
+    pPanels.forEach(panel => {
+        panel.style.display = isTeacherMode ? "block" : "none";
+    });
+
+    // 4. 循环批量切换题目赏析板的 display 状态
+    quizDataList.forEach(q => {
+        const qPanel = document.getElementById(`q-analysis-${q.id}`);
+        if (qPanel) {
+            qPanel.style.display = isTeacherMode ? "block" : "none";
+        }
+    });
 }
 
 // ==================== 🎯 核心：错题隐藏式批改控制引擎 ====================
