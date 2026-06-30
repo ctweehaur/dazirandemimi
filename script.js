@@ -78,17 +78,14 @@ function render() {
             paragraphElement.insertBefore(s, paragraphElement.firstChild); 
             cnt.appendChild(paragraphElement);
 
-            // 👁️ 赏析节点预渲染：移除单个收起按钮，恢复纯粹的卡片内容展示
+            // 👁️ 赏析节点预渲染：颜色和皮肤交由 css 的 !important 处理
             if (typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
                 let pAnalysis = document.createElement("div");
                 pAnalysis.id = `p-analysis-${pNum}`;
                 pAnalysis.className = "teacher-p-analysis";
-                pAnalysis.style.background = "#faf5ff";
-                pAnalysis.style.borderLeft = "3px solid #af7ac5";
-                pAnalysis.style.padding = "10px 15px"; // 恢复紧凑美观的外边距
+                pAnalysis.style.padding = "10px 15px"; 
                 pAnalysis.style.margin = "5px 0 20px 0";
                 pAnalysis.style.fontSize = "13.5px";
-                pAnalysis.style.color = "#6c3483";
                 pAnalysis.style.borderRadius = "4px";
                 pAnalysis.style.textIndent = "0";
                 pAnalysis.innerHTML = `<strong>🔍 第 ${pNum} 段文本赏析：</strong>${lessonTeacherAnalysis.paragraphs[pNum]}`;
@@ -161,12 +158,9 @@ function renderMultipleChoiceQuizzes() {
         if (q.teacherAnalysis) {
             let qAnalysis = document.createElement("div");
             qAnalysis.id = `q-analysis-${q.id}`;
-            qAnalysis.style.background = "#faf5ff";
-            qAnalysis.style.borderLeft = "3px solid #af7ac5";
             qAnalysis.style.padding = "8px 12px";
             qAnalysis.style.marginBottom = "10px";
             qAnalysis.style.fontSize = "13px";
-            qAnalysis.style.color = "#6c3483";
             qAnalysis.style.borderRadius = "4px";
             qAnalysis.innerHTML = `<strong>📐 设题意图与核心考点：</strong>${q.teacherAnalysis}`;
             
@@ -347,7 +341,6 @@ function retryQuizAnswers() {
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
 }
 
-// 揭晓谜底（不要高光，只在后面追加 ✅）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
