@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 最终纯净去高亮版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 绿圈提示完美修复版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -165,8 +165,8 @@ function renderMultipleChoiceQuizzes() {
             qBox.appendChild(qAnalysis);
         }
 
-        const optionsBox = document.createElement('div');
-        optionsBox.className = "options-group";
+        const oBox = document.createElement('div');
+        oBox.className = "options-group";
         
         let pureContents = q.options.map(opt => opt.replace(/^[A-D]\s+/, ""));
         let shuffledContents = [...pureContents].sort(() => Math.random() - 0.5);
@@ -180,8 +180,9 @@ function renderMultipleChoiceQuizzes() {
             btn.innerText = finalOptText;
             btn.className = "quiz-choice-btn";
             
-            const originalMatch = q.options.find(o => o.endsWith(content));
-            btn.setAttribute("data-original-text", originalMatch);
+            // 🛠️ 修复点1：确保完全匹配原始的 A B C D 文本录入给 data 属性
+            const originalMatch = q.options.find(o => o.replace(/^[A-D]\s+/, "") === content);
+            btn.setAttribute("data-original-text", originalMatch || finalOptText);
 
             btn.style.display = "block";
             btn.style.width = "100%";
@@ -195,18 +196,17 @@ function renderMultipleChoiceQuizzes() {
             btn.onclick = () => {
                 if (btn.disabled) return;
                 
-                Array.from(optionsBox.children).forEach(b => {
+                Array.from(oBox.children).forEach(b => {
                     b.classList.remove('selected');
                 });
 
                 btn.classList.add('selected');
-                // 录入最纯净的原始匹配文本，确保判分完全脱离魔改后的 innerText
-                userSelectedAnswers[q.id] = originalMatch;
+                userSelectedAnswers[q.id] = originalMatch || finalOptText;
             };
-            optionsBox.appendChild(btn);
+            oBox.appendChild(btn);
         });
 
-        qBox.appendChild(optionsBox);
+        qBox.appendChild(oBox);
         container.appendChild(qBox);
     });
 }
@@ -265,7 +265,6 @@ function submitAndShowWrongOnly() {
         const buttons = qBox.querySelectorAll('.quiz-choice-btn');
         const studentOriginalText = userSelectedAnswers[q.id];
 
-        // 依靠唯一匹配定位选中的按钮
         let selectedBtn = null;
         buttons.forEach(btn => {
             if (btn.getAttribute("data-original-text") === studentOriginalText) { selectedBtn = btn; }
@@ -277,14 +276,14 @@ function submitAndShowWrongOnly() {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 如果学生这道题做【对】了 -> 在其后面追加 (✅)
+            // 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不污染背景
             if (btn === selectedBtn && studentLetter === q.answer) {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
             }
 
-            // 如果学生做【错】了 -> 将学生的错项染红打叉
+            // 如果学生做【错】了 -> 将学生的错项独立强染红底白字
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -326,26 +325,28 @@ function revealRealCorrectAnswers() {
 
         buttons.forEach(btn => {
             const btnOriginalText = btn.getAttribute("data-original-text");
-            const btnLetter = btnOriginalText.trim().charAt(0); 
+            // 🛠️ 修复点2：增加兜底抓取，确保不管怎么乱序都能精准捕捉到前缀开头的字母 (A/B/C/D)
+            const btnLetter = btnOriginalText ? btnOriginalText.trim().charAt(0) : btn.innerText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 1. 清洗机制：先洗干净文本后缀，防重叠
+                // 清洗机制：先洗干净文本后缀，防重复叠加
                 let currentText = btn.innerText;
                 currentText = currentText.replace("  (✅)", "").replace(" (✅)", "");
                 
-                // 2. 重新利落地追加一个打勾小标
+                // 重新追加一个打勾小标并加粗
                 btn.innerText = currentText + "  (✅)";
-                
-                // 3. 🚨 核心改动：不再强制覆盖绿色背景（.style.background = "#2ecc71" 已被拔除）
-                // 仅给正确选项加粗文字并微调边框色，让它完全契合你的 CSS（无论是白底还是黑底）
                 btn.style.fontWeight = "bold";
-                if (!btn.classList.contains('selected')) {
-                    btn.style.borderColor = "#2ecc71"; // 为未选中的正确项添一圈绿框进行暗示
-                }
+                
+                // 🚀 精准激活：为正确选项添加类名，强制触发 style.css 里的淡淡绿圈样式！
+                btn.classList.add('correct-answer-hint');
             }
         });
     });
     document.getElementById('showCorrectBtn').style.display = "none";
+}
+
+function submitAllAnswers() {
+    submitAndShowWrongOnly();
 }
 
 // ==================== 🛠 *字词字典弹窗核心逻辑 ============================
