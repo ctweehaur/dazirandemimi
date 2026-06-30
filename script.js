@@ -263,34 +263,21 @@ function submitAndShowWrongOnly() {
     resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// 【流程 2/3】：学生点击“重新作答” -> 彻底初始化选择态
+// 【流程 2/3】：学生点击“重新作答” -> 移除历史答案、重新进行选项洗牌（Shuffle）
 function retryQuizAnswers() {
-    const allButtons = document.querySelectorAll('.quiz-choice-btn');
-    allButtons.forEach(btn => {
-        btn.disabled = false;
-        btn.classList.remove('selected');
-        btn.style.background = "#fff";
-        btn.style.borderColor = "#dcdde1";
-        btn.style.color = "inherit";
-        btn.style.fontWeight = "normal";
-        btn.style.boxShadow = "none";
-        
-        // 剥离打分时追加的各种状态小挂件文本
-        btn.innerText = btn.innerText.replace("  (✅️)", "").replace("  (❌️)", "").replace("  (✅)", "");
-    });
+    // 1. 直接触发核心渲染器，这会自动清除旧的 DOM 并完成新一轮选项随机洗牌（Shuffle）
+    renderMultipleChoiceQuizzes();
 
-    // 内存数据彻底离场
-    userSelectedAnswers = {};
+    // 2. 确保隐藏所有的结果计分板和额外按钮，彻底返回最初答题界面
     document.getElementById('quizResultScore').style.display = "none";
-
-    // 恢复初始主提交按钮
+    document.getElementById('retryQuizBtn').style.display = "none";
+    document.getElementById('showCorrectBtn').style.display = "none";
+    
+    // 3. 让主提交按钮回到初始状态
     document.getElementById('submitQuizBtn').style.display = "inline-block";
     document.getElementById('submitQuizBtn').disabled = false;
     document.getElementById('submitQuizBtn').style.background = "#34495e";
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
-
-    document.getElementById('retryQuizBtn').style.display = "none";
-    document.getElementById('showCorrectBtn').style.display = "none";
 }
 
 // 【流程 3/3】：学生点击“查看正确答案” -> 此时揭晓谜底（不要高光，只在后面加 ✅）
@@ -308,11 +295,11 @@ function revealRealCorrectAnswers() {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                     
-                    // 如果这题学生选错了，正确按钮原本是白色的，我们给它的文本加粗加黑一下，显得醒目一些（但不要背景色）
+                    // 如果这题学生选错了，正确按钮原本是白色的，我们给它的文本加粗，边框变绿微调暗示
                     if (!btn.innerText.includes("  (❌️)")) {
                         btn.style.fontWeight = "bold";
                         btn.style.color = "#2c3e50";
-                        btn.style.borderColor = "#2ecc71"; // 边框稍微带一点点绿暗示
+                        btn.style.borderColor = "#2ecc71"; 
                     }
                 }
             }
