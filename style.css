@@ -415,7 +415,7 @@ ruby:hover, ruby.is-active {
     background: #f8fafc !important;
 }
 
-/* 🌟 日间模式下选中的强效视觉标记 */
+/* 🌟 日间模式下：选中的高档国风蓝色样式 */
 .quiz-choice-btn.selected {
     background: #f0f8ff !important;
     border: 2px solid #2980b9 !important; 
@@ -424,10 +424,13 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
 }
 
-/* 💡 日间模式下正确答案的淡淡绿圈暗示（仅在未被学生选中时触发，杜绝重叠） */
-.quiz-choice-btn.correct-answer-hint:not(.selected) {
-    border: 1.5px solid #2ecc71 !important; 
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.1) !important; 
+/* 🟢 完美融合：日间模式下揭晓正确答案的【浅绿色版】高级卡片风格（完全没有重叠） */
+.quiz-choice-btn.correct-answer-hint {
+    background: #f4fbf7 !important;       /* 柔和的浅绿底色，与选中蓝等同质感 */
+    border: 2px solid #2ecc71 !important; /* 舒适的翡翠绿框 */
+    color: #27ae60 !important;            /* 深绿色文字 */
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.15) !important;
 }
 
 /* 🌟 🌙 暗黑模式下的无缝换肤接管 */
@@ -437,7 +440,7 @@ ruby:hover, ruby.is-active {
     color: #e0e0e0 !important; 
 }
 
-/* 暗黑模式未选中按钮状态：变深灰低调底框 */
+/* 暗黑模式未选中按钮状态 */
 [data-theme="dark"] .quiz-choice-btn {
     background: #2d2d2d !important;
     color: #e0e0e0 !important;
@@ -447,7 +450,7 @@ ruby:hover, ruby.is-active {
     background: #3d3d3d !important;
 }
 
-/* 🌟 🌙 暗黑模式下选中的强效视觉标记 */
+/* 🌟 🌙 暗黑模式下：选中的科技荧光蓝样式 */
 [data-theme="dark"] .quiz-choice-btn.selected {
     background: #1a252f !important;      
     border: 2px solid #3498db !important; 
@@ -456,17 +459,18 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
 }
 
-/* 💡 暗黑模式下未选中正确答案的淡淡绿圈暗示 */
-[data-theme="dark"] .quiz-choice-btn.correct-answer-hint:not(.selected) {
-    border: 1.5px solid #2ecc71 !important; 
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.2) !important;
+/* 🟢 🌙 暗黑模式下：揭晓正确答案的【浅绿夜色版】卡片风格 */
+[data-theme="dark"] .quiz-choice-btn.correct-answer-hint {
+    background: #1e2d24 !important;       /* 沉稳低饱和深绿暗底 */
+    border: 2px solid #2ecc71 !important; /* 极具科技感的荧光绿框 */
+    color: #58d68d !important;            /* 浅亮绿字 */
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.25) !important;
 }
 
 /* ==========================================================================
    👨‍🏫 文本赏析板块特制高级交互与跨模式主题样式
    ========================================================================== */
-
-/* ☀️ 日间模式默认国风淡紫赏析色调 */
 .teacher-p-analysis, [id^="q-analysis-"] {
     background: #faf5ff !important;
     border-left: 3px solid #af7ac5 !important;
@@ -477,8 +481,6 @@ ruby:hover, ruby.is-active {
     border-left: 4px solid #9b59b6 !important;
     color: #4a148c !important;
 }
-
-/* 🌙 暗黑模式护眼暗紫调配置 */
 [data-theme='dark'] #teacherArticleAnalysis {
     background: #251833 !important;       
     border-left: 4px solid #bb86fc !important;   
