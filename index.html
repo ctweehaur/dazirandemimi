@@ -41,20 +41,19 @@
         <div id="quizContainer"></div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #eaefed; text-align: center;">
-            <button id="submitQuizBtn" onclick="submitAnswersOnly()" style="padding: 12px 30px; background: #34495e; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                提交答案 🚀
+            <button id="submitQuizBtn" onclick="submitAndShowWrongOnly()" style="padding: 12px 30px; background: #34495e; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                提交检查 🚀
             </button>
             
             <button id="retryQuizBtn" onclick="retryQuizAnswers()" style="display: none; padding: 12px 30px; background: #e67e22; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s; margin-right: 10px;">
                 重新作答 🔄
             </button>
 
-            <button id="checkQuizBtn" onclick="checkQuizAnswersReal()" style="display: none; padding: 12px 30px; background: #2ecc71; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
-                检查答案 🔍
+            <button id="showCorrectBtn" onclick="revealRealCorrectAnswers()" style="display: none; padding: 12px 30px; background: #2ecc71; color: white; border: none; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.2s;">
+                查看正确答案 👁️
             </button>
 
-            <div id="quizStatusMessage" style="margin-top: 15px; font-size: 16px; font-weight: bold; color: #34495e;"></div>
-            <div id="quizResultScore" style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #2ecc71; display: none;"></div>
+            <div id="quizResultScore" style="margin-top: 15px; font-size: 18px; font-weight: bold; color: #2ecc71; display: none; line-height: 1.6;"></div>
         </div>
     </div>
 
