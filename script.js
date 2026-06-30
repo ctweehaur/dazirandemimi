@@ -195,7 +195,7 @@ function renderMultipleChoiceQuizzes() {
 
 // ==================== 🎯 核心：错题隐藏式批改控制引擎 ====================
 
-// 【流程 1/3】：学生点击“提交检查” -> 只批改学生的选择状态，绝不提前染绿或标注正确选项
+// 【流程 1/3】：学生点击“提交检查” -> 只标红错题，对的题不给特殊高光或 ✅ 符号
 function submitAndShowWrongOnly() {
     const totalQuestions = quizDataList.length;
     const answeredCount = Object.keys(userSelectedAnswers).length;
@@ -222,7 +222,7 @@ function submitAndShowWrongOnly() {
         const studentLetter = studentOriginalText.trim().charAt(0);
 
         buttons.forEach(btn => {
-            btn.disabled = true; // 锁定全盘，防止中间篡改
+            btn.disabled = true; // 锁定全盘
             
             // 清理选中的临时蓝色底色
             btn.style.background = "#fff";
@@ -230,15 +230,14 @@ function submitAndShowWrongOnly() {
             btn.style.borderColor = "#dcdde1";
             btn.style.boxShadow = "none";
 
-            // 💡 如果选对了 -> 将当前项染绿打勾（这里保留绿底因为是学生自己选出来的，让他有成就感）
+            // 💡 如果选对了 -> 保持纯白原样（不加高亮，不加任何打勾符号）
             if (btn === selectedBtn && studentLetter === q.answer) {
-                btn.style.background = "#2ecc71";
-                btn.style.color = "white";
-                btn.style.borderColor = "#2ecc71";
-                if (!btn.innerText.includes("  (✅️)")) btn.innerText = btn.innerText + "  (✅️)";
+                btn.style.background = "#fff";
+                btn.style.color = "inherit";
+                btn.style.borderColor = "#dcdde1";
             }
             
-            // 💡 如果选错了 -> 将错项染红打叉（重点：此时真正的正确项绝不打勾也不亮绿，保持全白）
+            // 💡 如果选错了 -> 将学生的错项染红打叉（正确项依然保持全白隐藏）
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -263,24 +262,24 @@ function submitAndShowWrongOnly() {
     resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// 【流程 2/3】：学生点击“重新作答” -> 移除历史答案、重新进行选项洗牌（Shuffle）
+// 【流程 2/3】：学生点击“重新作答” -> 彻底清空临时答案并对选项重洗牌（Shuffle）
 function retryQuizAnswers() {
-    // 1. 直接触发核心渲染器，这会自动清除旧的 DOM 并完成新一轮选项随机洗牌（Shuffle）
+    // 1. 直接重新执行初始化生成器（这会自动抹去对错后缀并重新进行 Shuffle 洗牌）
     renderMultipleChoiceQuizzes();
 
-    // 2. 确保隐藏所有的结果计分板和额外按钮，彻底返回最初答题界面
+    // 2. 隐藏所有的结果计分板和额外控制按钮
     document.getElementById('quizResultScore').style.display = "none";
     document.getElementById('retryQuizBtn').style.display = "none";
     document.getElementById('showCorrectBtn').style.display = "none";
     
-    // 3. 让主提交按钮回到初始状态
+    // 3. 将主提交按钮显现并激活
     document.getElementById('submitQuizBtn').style.display = "inline-block";
     document.getElementById('submitQuizBtn').disabled = false;
     document.getElementById('submitQuizBtn').style.background = "#34495e";
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
 }
 
-// 【流程 3/3】：学生点击“查看正确答案” -> 此时揭晓谜底（不要高光，只在后面加 ✅）
+// 【流程 3/3】：学生点击“查看正确答案” -> 此时揭晓谜底（不要高光，只在后面追加 ✅）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
@@ -295,7 +294,7 @@ function revealRealCorrectAnswers() {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                     
-                    // 如果这题学生选错了，正确按钮原本是白色的，我们给它的文本加粗，边框变绿微调暗示
+                    // 如果这题学生做错了，我们将正确选项文本稍微加粗，边框微调暗示
                     if (!btn.innerText.includes("  (❌️)")) {
                         btn.style.fontWeight = "bold";
                         btn.style.color = "#2c3e50";
@@ -306,11 +305,11 @@ function revealRealCorrectAnswers() {
         });
     });
 
-    // 终局状态：隐藏揭晓谜底按钮，允许保留重新挑战权利
+    // 终局状态：隐藏揭晓按钮
     document.getElementById('showCorrectBtn').style.display = "none";
 }
 
-// 留存旧钩子别名，防止初始化或库外冲突
+// 留存旧钩子别名，防止冲突
 function submitAllAnswers() {
     submitAndShowWrongOnly();
 }
@@ -424,4 +423,5 @@ function loadQuestion() {
     }); 
 }
 
+// 切换主题样式
 function toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='dark'?'':'dark'); }
