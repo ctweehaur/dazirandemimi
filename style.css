@@ -139,10 +139,10 @@ body {
     background: var(--card-bg);
     padding: 25px;
     border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(142, 68, 173, 0.12);
+    box-shadow: 0 10px 30px rgba(142, 68, 173, 0.05);
     margin-bottom: 25px;
     box-sizing: border-box;
-    border: 1px solid rgba(142, 68, 173, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .quiz-card {
@@ -174,10 +174,12 @@ body {
     transition: all 0.2s;
 }
 
+/* 🛠️ 终极清洗：生词测试选项 Mouse over 时，换成完美的清爽浅蓝色调 */
 .quiz-opt-btn:hover {
-    background: var(--card-bg);
-    border-color: #8e44ad;
-    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.08);
+    background: #f0f7fc !important;      
+    border-color: #3498db !important;    
+    color: #2980b9 !important;           
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1) !important; 
     transform: translateY(-1px);
 }
 
