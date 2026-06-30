@@ -201,7 +201,6 @@ const lessonData = [
     ["头", "tóu", "head", "kepala"],
     ["探出", "tàn chū", "poke out / stick out", "menjenguk keluar / mengeluarkan"],
     ["巢穴", "cháo xué", "nest / lair", "sarang"],
-    ["巢口", "", "", ""], // 👈 纯文字标点处理
     ["儿", "r", "suffix particle", ""],
     ["，", "", "", ""],
     ["却", "què", "but / however", "tetapi / namun"],
@@ -294,7 +293,7 @@ const lessonData = [
     ["！", "", "", ""],
     ["”", "", "", ""],
     ["，", "", "", ""],
-    ["then", "rán hòu", "then", "kemudian / lalu"],
+    ["然后", "rán hòu", "then", "kemudian / lalu"],
     ["转头", "zhuǎn tóu", "turned head around", "memalingkan muka / menoleh"],
     ["再", "zài", "again", "lagi"],
     ["向着", "xiàng zhe", "towards / facing", "menghadap ke arah / kepada"],
