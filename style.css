@@ -150,13 +150,6 @@ body {
     padding: 10px 0;
 }
 
-.quiz-question {
-    font-size: 36px;
-    font-weight: bold;
-    color: #8e44ad;
-    letter-spacing: 2px;
-}
-
 .quiz-pinyin {
     font-size: 16px;
     color: #7f8c8d;
@@ -202,6 +195,24 @@ body {
     cursor: not-allowed;
     box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
 }
+
+/* ==========================================================================
+   ⚙️ 针对生词测试大字标题（ID: quizQuestion）的专属跨模式控色补丁
+   ========================================================================== */
+/* ☀️ 日间模式下大生词维持高级紫调 */
+#quizQuestion {
+    font-size: 36px;
+    font-weight: bold;
+    color: #8e44ad !important;
+    letter-spacing: 2px;
+    transition: color 0.3s ease;
+}
+
+/* 🌙 暗黑模式适配：无论 JS 内部如何重载，强制将其洗成纯白色！ */
+[data-theme="dark"] #quizQuestion {
+    color: #ffffff !important;
+}
+
 
 /* 📖 课文文章卡片 */
 .article-card {
@@ -424,11 +435,11 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
 }
 
-/* 🟢 完美融合：日间模式下揭晓正确答案的【浅绿色版】高级卡片风格（完全没有重叠） */
+/* 🟢 日间模式下揭晓正确答案的【浅绿色版】高级卡片风格 */
 .quiz-choice-btn.correct-answer-hint {
-    background: #f4fbf7 !important;       /* 柔和的浅绿底色，与选中蓝等同质感 */
-    border: 2px solid #2ecc71 !important; /* 舒适的翡翠绿框 */
-    color: #27ae60 !important;            /* 深绿色文字 */
+    background: #f4fbf7 !important;       
+    border: 2px solid #2ecc71 !important; 
+    color: #27ae60 !important;            
     font-weight: 700 !important;
     box-shadow: 0 4px 15px rgba(46, 204, 113, 0.15) !important;
 }
@@ -461,9 +472,9 @@ ruby:hover, ruby.is-active {
 
 /* 🟢 🌙 暗黑模式下：揭晓正确答案的【浅绿夜色版】卡片风格 */
 [data-theme="dark"] .quiz-choice-btn.correct-answer-hint {
-    background: #1e2d24 !important;       /* 沉稳低饱和深绿暗底 */
-    border: 2px solid #2ecc71 !important; /* 极具科技感的荧光绿框 */
-    color: #58d68d !important;            /* 浅亮绿字 */
+    background: #1e2d24 !important;       
+    border: 2px solid #2ecc71 !important; 
+    color: #58d68d !important;            
     font-weight: 700 !important;
     box-shadow: 0 4px 15px rgba(46, 204, 113, 0.25) !important;
 }
