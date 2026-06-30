@@ -416,7 +416,39 @@ ruby:hover, ruby.is-active {
     border: 2px solid #3498db !important; /* 科技荧光蓝边框 */
     color: #5dade2 !important;            /* 浅亮蓝字体 */
     font-weight: 700 !important;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.15 extremes); 
+}
+
+// ==========================================================================
+// 👨‍🏫 新增：文本赏析功能专配卡片样式（支持一键总控与夜间柔和配色）
+// ==========================================================================
+
+/* ☀️ 日间模式默认国风淡紫赏析色调 */
+.teacher-p-analysis, #teacherArticleAnalysis {
+    background: #faf5ff !important;
+    border-left: 3px solid #af7ac5 !important;
+    color: #6c3483 !important;
+    transition: background 0.3s, color 0.3s;
+}
+
+#teacherArticleAnalysis {
+    background: #f3e5f5 !important;
+    border-left: 4px solid #9b59b6 !important;
+    color: #4a148c !important;
+}
+
+/* 🌙 暗黑模式护眼暗紫调配置（自动在 [data-theme='dark'] 激活时无缝接管） */
+[data-theme='dark'] #teacherArticleAnalysis {
+    background: #251833 !important;       /* 极深沉无眩光暗紫底 */
+    border-left: 4px solid #bb86fc !important;   /* 高反差柔和霓虹浅紫线 */
+    color: #e1bee7 !important;             /* 护眼高清晰度淡芋紫字 */
+}
+
+[data-theme='dark'] .teacher-p-analysis, 
+[data-theme='dark'] [id^="q-analysis-"] {
+    background: #1d1226 !important;       /* 柔和暗紫色背景 */
+    border-left: 3px solid #a278b5 !important;   /* 低饱和度哑光紫边框 */
+    color: #d7bde2 !important;             /* 降亮度柔和文字色 */
 }
 
 /* 📱 响应式适配移动端手机 */
