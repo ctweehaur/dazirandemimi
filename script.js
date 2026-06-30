@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 最终完美订正版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 终极去重纯净版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -188,7 +188,9 @@ function renderMultipleChoiceQuizzes() {
             btn.style.textAlign = "left";
             btn.style.margin = "6px 0";
             btn.style.padding = "10px 15px";
+            btn.style.border = "1px solid #dcdde1";
             btn.style.borderRadius = "6px";
+            btn.style.background = "#fff";
             btn.style.cursor = "pointer";
             btn.style.fontSize = "14px";
 
@@ -200,7 +202,8 @@ function renderMultipleChoiceQuizzes() {
                 });
 
                 btn.classList.add('selected');
-                userSelectedAnswers[q.id] = finalOptText;
+                // 录入最纯净的原始匹配文本，确保判分完全脱离魔改后的 innerText
+                userSelectedAnswers[q.id] = originalMatch;
             };
             optionsBox.appendChild(btn);
         });
@@ -210,7 +213,7 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板
+// 👁️ 控制开关：切换文本赏析面板的一键联动
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
@@ -262,28 +265,28 @@ function submitAndShowWrongOnly() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
         const buttons = qBox.querySelectorAll('.quiz-choice-btn');
-        const studentOptText = userSelectedAnswers[q.id];
+        const studentOriginalText = userSelectedAnswers[q.id];
 
+        // 依靠底层唯一映射来定位按钮，杜绝依据变化多端的 innerText 查找
         let selectedBtn = null;
         buttons.forEach(btn => {
-            if (btn.innerText === studentOptText) { selectedBtn = btn; }
+            if (btn.getAttribute("data-original-text") === studentOriginalText) { selectedBtn = btn; }
         });
 
-        const studentOriginalText = selectedBtn.getAttribute("data-original-text");
         const studentLetter = studentOriginalText.trim().charAt(0);
 
         buttons.forEach(btn => {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 💡 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不再染色
+            // 如果学生这道题做【对】了 -> 在其后面追加 (✅)
             if (btn === selectedBtn && studentLetter === q.answer) {
-                if (!btn.innerText.includes("  (✅)")) {
+                if (!btn.innerText.includes(" (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
             }
 
-            // 如果学生做【错】了 -> 将学生的错项独立强染红底白字
+            // 如果学生做【错】了 -> 将学生的错项染红打叉
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -328,24 +331,22 @@ function revealRealCorrectAnswers() {
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 💡 核心修复：只有在【完全不包含】对勾字符串的情况下，才允许拼接添加！
-                if (!btn.innerText.includes("  (✅)")) {
-                    btn.innerText = btn.innerText + "  (✅)";
-                }
+                // 终极清洗机制：先把可能包含的错勾全部剔除洗净，确保文字纯净
+                let currentText = btn.innerText;
+                currentText = currentText.replace("  (✅)", "").replace(" (✅)", "");
                 
-                // 彻底强行绿显正确答案（覆盖黑白两套 CSS 选择态，消除歧义）
-                btn.style.background = "#2ecc71";
-                btn.style.color = "white";
-                btn.style.borderColor = "#2ecc71"; 
+                // 重新干净利落地只加一个
+                btn.innerText = currentText + "  (✅)";
+                
+                // 彻底强行绿显正确答案（不受黑夜白天任何样式干扰）
+                btn.style.setProperty('background', '#2ecc71', 'important');
+                btn.style.setProperty('color', 'white', 'important');
+                btn.style.setProperty('border-color', '#2ecc71', 'important');
                 btn.style.fontWeight = "bold";
             }
         });
     });
     document.getElementById('showCorrectBtn').style.display = "none";
-}
-
-function submitAllAnswers() {
-    submitAndShowWrongOnly();
 }
 
 // ==================== 🛠 *字词字典弹窗核心逻辑 ============================
