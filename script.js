@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 答对无绿圈纯净版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 浅绿质感完全适配版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -305,7 +305,6 @@ function submitAndShowWrongOnly() {
     resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-// 重新作答
 function retryQuizAnswers() {
     renderMultipleChoiceQuizzes();
     document.getElementById('quizResultScore').style.display = "none";
@@ -336,8 +335,9 @@ function revealRealCorrectAnswers() {
                 btn.innerText = currentText + "  (✅)";
                 btn.style.fontWeight = "bold";
                 
-                // 💡 彻底清爽：这里移除了任何 correct-answer-hint 类名的添加！
-                // 答对的题目会完全保持原本选中的状态，绝不再亮起绿圈
+                // 💡 优雅平替：直接注入 CSS 浅绿提示皮肤！
+                // 这时如果原本有 selected (蓝圈)，CSS 里的优先级规则会利落地将其切换为浅绿色！
+                btn.classList.add('correct-answer-hint');
             }
         });
     });
