@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 主题无缝解耦版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 最终完美订正版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -210,7 +210,7 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板的一键联动
+// 👁️ 控制开关：切换文本赏析面板
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
@@ -276,12 +276,14 @@ function submitAndShowWrongOnly() {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 如果学生这道题做【对】了 -> 在其后面追加 (✅)
+            // 💡 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不再染色
             if (btn === selectedBtn && studentLetter === q.answer) {
-                if (!btn.innerText.includes("  (✅)")) btn.innerText = btn.innerText + "  (✅)";
+                if (!btn.innerText.includes("  (✅)")) {
+                    btn.innerText = btn.innerText + "  (✅)";
+                }
             }
 
-            // 如果学生做【错】了 -> 将学生的错项染红打叉
+            // 如果学生做【错】了 -> 将学生的错项独立强染红底白字
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -315,7 +317,7 @@ function retryQuizAnswers() {
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
 }
 
-// 揭晓真正的谜底（将正确答案彻底变绿显现）
+// 揭晓真正的谜底（点击查看正确答案按钮触发）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
@@ -326,12 +328,12 @@ function revealRealCorrectAnswers() {
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 💡 修复去重：只有在没有 ✅ 的情况下才追加，防止原本就答对的题目出现双重对勾
+                // 💡 核心修复：只有在【完全不包含】对勾字符串的情况下，才允许拼接添加！
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
                 
-                // 彻底强行绿显正确答案（不受黑夜白天模式影响，确保清晰可见）
+                // 彻底强行绿显正确答案（覆盖黑白两套 CSS 选择态，消除歧义）
                 btn.style.background = "#2ecc71";
                 btn.style.color = "white";
                 btn.style.borderColor = "#2ecc71"; 
@@ -340,6 +342,10 @@ function revealRealCorrectAnswers() {
         });
     });
     document.getElementById('showCorrectBtn').style.display = "none";
+}
+
+function submitAllAnswers() {
+    submitAndShowWrongOnly();
 }
 
 // ==================== 🛠 *字词字典弹窗核心逻辑 ============================
