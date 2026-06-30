@@ -264,15 +264,11 @@ function submitAndShowWrongOnly() {
 
 // 【流程 2/3】：学生点击“重新作答” -> 彻底清空临时答案并对选项重洗牌（Shuffle）
 function retryQuizAnswers() {
-    // 1. 直接重新执行初始化生成器（这会自动抹去对错后缀并重新进行 Shuffle 洗牌）
     renderMultipleChoiceQuizzes();
-
-    // 2. 隐藏所有的结果计分板和额外控制按钮
     document.getElementById('quizResultScore').style.display = "none";
     document.getElementById('retryQuizBtn').style.display = "none";
     document.getElementById('showCorrectBtn').style.display = "none";
     
-    // 3. 将主提交按钮显现并激活
     document.getElementById('submitQuizBtn').style.display = "inline-block";
     document.getElementById('submitQuizBtn').disabled = false;
     document.getElementById('submitQuizBtn').style.background = "#34495e";
@@ -293,8 +289,6 @@ function revealRealCorrectAnswers() {
             if (btnLetter === q.answer) {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
-                    
-                    // 如果这题学生做错了，我们将正确选项文本稍微加粗，边框微调暗示
                     if (!btn.innerText.includes("  (❌️)")) {
                         btn.style.fontWeight = "bold";
                         btn.style.color = "#2c3e50";
@@ -304,17 +298,14 @@ function revealRealCorrectAnswers() {
             }
         });
     });
-
-    // 终局状态：隐藏揭晓按钮
     document.getElementById('showCorrectBtn').style.display = "none";
 }
 
-// 留存旧钩子别名，防止冲突
 function submitAllAnswers() {
     submitAndShowWrongOnly();
 }
 
-// ==================== 🛠️ 独立字词高精准字典解释弹窗核心逻辑 ============================
+// ==================== 🛠️ 字词字典弹窗核心逻辑 ============================
 function openPop(el, i) {
     currentIdx = i; const d = lessonData[i];
     document.getElementById('popWord').innerText = d[0];
@@ -352,6 +343,7 @@ function saveToNotebook(e) {
     setTimeout(() => btn.innerText = "Copy 📋", 1000); 
 }
 
+// 📖 生词本渲染器：更新支持点击删除单个生词
 function renderNB() { 
     const list = document.getElementById('notebookList'); 
     if (saved.length === 0) { 
@@ -361,10 +353,20 @@ function renderNB() {
         saved.forEach(idx => { 
             const item = lessonData[idx]; 
             if(!item) return; 
+            
+            // 1. 创建生词外层卡片容器
             const div = document.createElement("div"); 
             div.className = "notebook-item"; 
-            div.innerText = item[0]; 
-            div.onclick = (e) => { 
+            div.style.display = "inline-flex";
+            div.style.alignItems = "center";
+            div.style.gap = "6px";
+            div.style.cursor = "pointer";
+
+            // 2. 创建文字展示节点
+            const textSpan = document.createElement("span");
+            textSpan.innerText = item[0];
+            // 点击文字：平滑滚动到正文并展示拼音字典气泡
+            textSpan.onclick = (e) => { 
                 e.stopPropagation(); 
                 const target = document.querySelector(`ruby[data-word-index="${idx}"]`); 
                 if(target) { 
@@ -376,9 +378,47 @@ function renderNB() {
                     }, 500); 
                 } 
             }; 
+            div.appendChild(textSpan);
+
+            // 3. 新增：创建个别删除小叉叉按钮（×）
+            const deleteBtn = document.createElement("span");
+            deleteBtn.innerText = "×";
+            deleteBtn.style.color = "#e74c3c";
+            deleteBtn.style.fontWeight = "bold";
+            deleteBtn.style.padding = "0 2px";
+            deleteBtn.style.cursor = "pointer";
+            deleteBtn.style.borderRadius = "50%";
+            deleteBtn.style.transition = "all 0.2s";
+            
+            deleteBtn.onmouseenter = () => { deleteBtn.style.background = "#fce4e4"; };
+            deleteBtn.onmouseleave = () => { deleteBtn.style.background = "transparent"; };
+            
+            // 点击小叉叉：只剔除当前生词
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation(); // 阻止触发跳转事件
+                removeSingleWordFromNotebook(idx);
+            };
+            div.appendChild(deleteBtn);
+
             list.appendChild(div); 
         }); 
     } 
+}
+
+// 🗑️ 新增功能：单独移除生词本中的指定生词
+function removeSingleWordFromNotebook(idx) {
+    // 从已存储的 saved 数组里过滤掉当前点击的生词索引
+    saved = saved.filter(savedIdx => savedIdx !== idx);
+    // 更新本地持久化存储
+    localStorage.setItem('saved_104', JSON.stringify(saved)); 
+    // 重新渲染生词本界面
+    renderNB(); 
+    
+    // 如果移除后本子空了，顺便收回测试面板
+    if (saved.length === 0) {
+        document.getElementById('gameContainer').style.display = 'none'; 
+        document.getElementById('gameToggleBtn').innerText = "🎯 生词测试";
+    }
 }
 
 function forceClearNotebook() { localStorage.removeItem('saved_104'); saved = []; renderNB(); document.getElementById('gameContainer').style.display = 'none'; document.getElementById('gameToggleBtn').innerText = "🎯 生词测试"; }
@@ -423,5 +463,4 @@ function loadQuestion() {
     }); 
 }
 
-// 切换主题样式
 function toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='dark'?'':'dark'); }
