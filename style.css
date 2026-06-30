@@ -1,498 +1,500 @@
-// ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 绿圈提示极致适配版)
-// ==========================================================================
+/* ==========================================================================
+   🎨 现代华文学习平台全局样式 - style.css (2026 极致美化国风增强版)
+   ========================================================================== */
 
-let currentIdx = -1; 
-let saved = JSON.parse(localStorage.getItem('saved_104')) || [];
-let quizData = [];
-let currentQuizIdx = 0;
-let isLocked = false;
-let isTeacherMode = false; // 文本赏析状态开关
-let userSelectedAnswers = {}; // 存储学生当前选中的临时答案 (格式： { 题目ID: "选中的选项完整文本" })
-
-window.onload = function() {
-    // 初始化网页标题
-    document.getElementById('articleTitle').innerText = lessonTitle;
-    document.title = lessonTitle;
-
-    // 渲染课文基底、生词本和选择题
-    if (typeof lessonData !== 'undefined') { 
-        render(); 
-        renderNB(); 
-        renderMultipleChoiceQuizzes(); 
-    }
-    
-    // 初始化气泡弹窗事件，点击空白处自动收回激活状态
-    document.body.appendChild(document.getElementById('buddyPopover'));
-    document.addEventListener('click', () => { 
-        document.getElementById('buddyPopover').style.display = 'none'; 
-        document.querySelectorAll('ruby').forEach(r => r.classList.remove('is-active'));
-    });
-};
-
-// 📖 正文渲染器：支持华文首行空两格，并为深度文本赏析预留 DOM 节点
-function render() {
-    const cnt = document.getElementById('content'); 
-    cnt.innerHTML = "";
-    let pNum = 1; 
-    let p = document.createElement("p"); 
-    
-    // 渲染课文顶部的全局总览赏析板
-    const topAnalysis = document.getElementById('teacherArticleAnalysis');
-    const topAnalysisContent = document.getElementById('teacherArticleAnalysisContent');
-    if (topAnalysis && topAnalysisContent) {
-        if (isTeacherMode && typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.overview) {
-            topAnalysis.style.display = "block";
-            topAnalysisContent.innerHTML = `<strong>💡 课文总览与赏析要点：</strong><br>${lessonTeacherAnalysis.overview}`;
-        } else {
-            topAnalysis.style.display = "none";
-        }
-    }
-
-    function finalizeParagraph(paragraphElement) {
-        if (paragraphElement.childNodes.length === 0) return;
-        const textContent = paragraphElement.innerText.trim();
-        const isAuthorLineAtEnd = (textContent.startsWith("（") && textContent.includes("《"));
-        
-        if (isAuthorLineAtEnd) {
-            paragraphElement.style.textIndent = "0";
-            paragraphElement.style.textAlign = "right";  
-            paragraphElement.style.color = "#7f8c8d";    
-            paragraphElement.style.fontSize = "15px";     
-            paragraphElement.style.marginTop = "30px";    
-            cnt.appendChild(paragraphElement);
-        } else {
-            paragraphElement.style.position = "relative";
-            paragraphElement.style.textIndent = "2em"; 
-            paragraphElement.style.paddingLeft = "0"; 
-            paragraphElement.style.marginBottom = "15px";
-            
-            let s = document.createElement("span");
-            s.className = "p-index";
-            s.innerText = "第" + pNum + "段";
-            s.style.position = "absolute";
-            s.style.left = "-55px"; 
-            s.style.top = "4px"; 
-            s.style.textIndent = "0"; 
-            
-            paragraphElement.insertBefore(s, paragraphElement.firstChild); 
-            cnt.appendChild(paragraphElement);
-
-            // 👁️ 赏析节点预渲染
-            if (typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
-                let pAnalysis = document.createElement("div");
-                pAnalysis.id = `p-analysis-${pNum}`;
-                pAnalysis.className = "teacher-p-analysis";
-                pAnalysis.style.padding = "10px 15px"; 
-                pAnalysis.style.margin = "5px 0 20px 0";
-                pAnalysis.style.fontSize = "13.5px";
-                pAnalysis.style.borderRadius = "4px";
-                pAnalysis.style.textIndent = "0";
-                pAnalysis.innerHTML = `<strong>🔍 第 ${pNum} 段文本赏析：</strong>${lessonTeacherAnalysis.paragraphs[pNum]}`;
-                
-                pAnalysis.style.display = isTeacherMode ? "block" : "none";
-                cnt.appendChild(pAnalysis);
-            }
-
-            pNum++; 
-        }
-    }
-
-    lessonData.forEach((d, i) => {
-        if (d[0] === "\n") { finalizeParagraph(p); p = document.createElement("p"); }
-        else if (d[1] === "") { let s = document.createElement("span"); s.innerText = d[0]; p.appendChild(s); }
-        else {
-            let r = document.createElement("ruby"); 
-            r.setAttribute("data-word-index", i);
-            r.onclick = (e) => { 
-                e.stopPropagation(); 
-                document.querySelectorAll('ruby').forEach(x=>x.classList.remove('is-active')); 
-                r.classList.add('is-active'); 
-                openPop(e.currentTarget, i);
-            };
-            r.innerHTML = `${d[0]}<rt>${d[1]}</rt>`; 
-            p.appendChild(r);
-        }
-    });
-    finalizeParagraph(p);
+:root {
+    --bg-color: linear-gradient(135deg, #f4f7f6 0%, #eaefed 100%); /* 护眼莫兰迪柔和微渐变 */
+    --text-color: #2c3e50;
+    --card-bg: #ffffff;
+    --primary-color: #34495e;
+    --accent-color: #2ecc71;
+    --ai-color: #9b59b6;
+    --ruby-color: #e67e22;
+    --input-border: #cbd5e1;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 25px rgba(44, 62, 80, 0.05);
 }
 
-// 🎯 选择题渲染器
-function renderMultipleChoiceQuizzes() {
-    if (typeof quizDataList === 'undefined' || quizDataList.length === 0) return;
-    
-    const section = document.getElementById('quizSection');
-    const container = document.getElementById('quizContainer');
-    container.innerHTML = "";
-    section.style.display = "block"; 
-    
-    userSelectedAnswers = {};
-    document.getElementById('quizResultScore').style.display = "none";
-
-    // 恢复控制按钮的初始显隐状态
-    document.getElementById('submitQuizBtn').style.display = "inline-block";
-    document.getElementById('submitQuizBtn').disabled = false;
-    document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
-    
-    document.getElementById('retryQuizBtn').style.display = "none";
-    document.getElementById('showCorrectBtn').style.display = "none";
-
-    quizDataList.forEach((q) => {
-        const qBox = document.createElement('div');
-        qBox.style.marginBottom = "25px";
-        qBox.style.paddingBottom = "15px";
-        qBox.style.borderBottom = "1px dashed #ddd";
-        qBox.setAttribute("data-q-id", q.id);
-
-        const qText = document.createElement('div');
-        qText.style.fontWeight = "bold";
-        qText.style.fontSize = "16px";
-        qText.style.marginBottom = "10px";
-        qText.innerHTML = `${q.id}. ${q.question.replace(/\n/g, '<br>')}`;
-        qBox.appendChild(qText);
-
-        // 👁️ 题目分析节点预渲染
-        if (q.teacherAnalysis) {
-            let qAnalysis = document.createElement("div");
-            qAnalysis.id = `q-analysis-${q.id}`;
-            qAnalysis.style.padding = "8px 12px";
-            qAnalysis.style.marginBottom = "10px";
-            qAnalysis.style.fontSize = "13px";
-            qAnalysis.style.borderRadius = "4px";
-            qAnalysis.innerHTML = `<strong>📐 设题意图与核心考点：</strong>${q.teacherAnalysis}`;
-            
-            qAnalysis.style.display = isTeacherMode ? "block" : "none";
-            qBox.appendChild(qAnalysis);
-        }
-
-        const optionsBox = document.className = "options-group";
-        const oBox = document.createElement('div');
-        oBox.className = "options-group";
-        
-        let pureContents = q.options.map(opt => opt.replace(/^[A-D]\s+/, ""));
-        let shuffledContents = [...pureContents].sort(() => Math.random() - 0.5);
-        const prefixes = ["A", "B", "C", "D"];
-
-        shuffledContents.forEach((content, index) => {
-            const prefix = prefixes[index];
-            const finalOptText = `${prefix} ${content}`;
-
-            const btn = document.createElement('button');
-            btn.innerText = finalOptText;
-            btn.className = "quiz-choice-btn";
-            
-            const originalMatch = q.options.find(o => o.endsWith(content));
-            btn.setAttribute("data-original-text", originalMatch);
-
-            btn.style.display = "block";
-            btn.style.width = "100%";
-            btn.style.textAlign = "left";
-            btn.style.margin = "6px 0";
-            btn.style.padding = "10px 15px";
-            btn.style.borderRadius = "6px";
-            btn.style.cursor = "pointer";
-            btn.style.fontSize = "14px";
-
-            btn.onclick = () => {
-                if (btn.disabled) return;
-                
-                Array.from(oBox.children).forEach(b => {
-                    b.classList.remove('selected');
-                });
-
-                btn.classList.add('selected');
-                userSelectedAnswers[q.id] = originalMatch;
-            };
-            oBox.appendChild(btn);
-        });
-
-        qBox.appendChild(oBox);
-        container.appendChild(qBox);
-    });
+/* 🌙 暗黑模式适配 */
+[data-theme="dark"] {
+    --bg-color: linear-gradient(135deg, #141414 0%, #202020 100%);
+    --text-color: #e0e0e0;
+    --card-bg: #222222;
+    --primary-color: #bdc3c7;
+    --input-border: #475569;
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+    --shadow-md: 0 10px 25px rgba(0,0,0,0.3);
 }
 
-// 👁️ 控制开关：切换文本赏析面板的一键联动
-function toggleTeacherMode() {
-    isTeacherMode = !isTeacherMode;
-    const btn = document.getElementById('teacherToggleBtn');
-    
-    if (isTeacherMode) {
-        btn.innerText = "❌ 关闭文本赏析";
-        btn.style.background = "#7d3c98";
-    } else {
-        btn.innerText = "👁️ 文本赏析";
-        btn.style.background = "#9b59b6";
-    }
-    
-    const topAnalysis = document.getElementById('teacherArticleAnalysis');
-    const topAnalysisContent = document.getElementById('teacherArticleAnalysisContent');
-    if (topAnalysis && topAnalysisContent) {
-        if (isTeacherMode && typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.overview) {
-            topAnalysis.style.display = "block";
-            topAnalysisContent.innerHTML = `<strong>💡 课文总览与赏析要点：</strong><br>${lessonTeacherAnalysis.overview}`;
-        } else {
-            topAnalysis.style.display = "none";
-        }
-    }
-
-    const pPanels = document.querySelectorAll('.teacher-p-analysis');
-    pPanels.forEach(panel => {
-        panel.style.display = isTeacherMode ? "block" : "none";
-    });
-
-    quizDataList.forEach(q => {
-        const qPanel = document.getElementById(`q-analysis-${q.id}`);
-        if (qPanel) {
-            qPanel.style.display = isTeacherMode ? "block" : "none";
-        }
-    });
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg-color);
+    background-attachment: fixed;
+    color: var(--text-color);
+    line-height: 1.8;
+    margin: 0;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: background 0.3s, color 0.3s;
 }
 
-// ==================== 🎯 错题隐藏式批改控制引擎 ====================
-function submitAndShowWrongOnly() {
-    const totalQuestions = quizDataList.length;
-    const answeredCount = Object.keys(userSelectedAnswers).length;
-
-    if (answeredCount < totalQuestions) {
-        alert(`⚠️ 老师发现你还有未填完的习题哦！目前完成了 (${answeredCount} / ${totalQuestions}) 题。`);
-        return;
-    }
-
-    let score = 0;
-
-    quizDataList.forEach(q => {
-        const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
-        const buttons = qBox.querySelectorAll('.quiz-choice-btn');
-        const studentOriginalText = userSelectedAnswers[q.id];
-
-        let selectedBtn = null;
-        buttons.forEach(btn => {
-            if (btn.getAttribute("data-original-text") === studentOriginalText) { selectedBtn = btn; }
-        });
-
-        const studentLetter = studentOriginalText.trim().charAt(0);
-
-        buttons.forEach(btn => {
-            btn.disabled = true; 
-            btn.style.boxShadow = "none";
-
-            // 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不再染色
-            if (btn === selectedBtn && studentLetter === q.answer) {
-                if (!btn.innerText.includes("  (✅)")) {
-                    btn.innerText = btn.innerText + "  (✅)";
-                }
-            }
-
-            // 如果学生做【错】了 -> 将学生的错项独立强染红底白字
-            if (btn === selectedBtn && studentLetter !== q.answer) {
-                btn.style.background = "#e74c3c";
-                btn.style.color = "white";
-                btn.style.borderColor = "#e74c3c";
-                if (!btn.innerText.includes("  (❌️)")) btn.innerText = btn.innerText + "  (❌️)";
-            }
-        });
-
-        if (studentLetter === q.answer) { score++; }
-    });
-
-    const resultBox = document.getElementById('quizResultScore');
-    resultBox.style.display = "block";
-    resultBox.innerHTML = `🎉 批改完成！您的当前得分是：<span style="font-size: 24px; color: #e67e22;">${score}</span> / ${totalQuestions} 分<br><small style="font-size:14px; font-weight:normal; color:#7f8c8d;">发现错题了？可以点击【重新作答】再试一次，或者点击【查看正确答案】。</small>`;
-    
-    document.getElementById('submitQuizBtn').style.display = "none";
-    document.getElementById('retryQuizBtn').style.display = "inline-block";
-    document.getElementById('showCorrectBtn').style.display = "inline-block";
-
-    resultBox.scrollIntoView({ behavior: "smooth", block: "center" });
+/* 🎛️ 控制面板样式 */
+.control-panel {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    width: 100%;
+    max-width: 800px;
 }
 
-function retryQuizAnswers() {
-    renderMultipleChoiceQuizzes();
-    document.getElementById('quizResultScore').style.display = "none";
-    document.getElementById('retryQuizBtn').style.display = "none";
-    document.getElementById('showCorrectBtn').style.display = "none";
-    
-    document.getElementById('submitQuizBtn').style.display = "inline-block";
-    document.getElementById('submitQuizBtn').disabled = false;
-    document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
+.control-panel button {
+    padding: 10px 20px;
+    border: 1px solid rgba(0,0,0,0.05);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 24px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
 }
 
-// 揭晓真正的谜底（点击查看正确答案按钮触发）
-function revealRealCorrectAnswers() {
-    quizDataList.forEach(q => {
-        const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
-        const buttons = qBox.querySelectorAll('.quiz-choice-btn');
-
-        buttons.forEach(btn => {
-            const btnOriginalText = btn.getAttribute("data-original-text");
-            const btnLetter = btnOriginalText.trim().charAt(0); 
-
-            if (btnLetter === q.answer) {
-                // 1. 清洗机制：先洗干净文本后缀，防重叠
-                let currentText = btn.innerText;
-                currentText = currentText.replace("  (✅)", "").replace(" (✅)", "");
-                
-                // 2. 重新追加一个打勾小标
-                btn.innerText = currentText + "  (✅)";
-                
-                // 3. 🚨 终极解决方案：不进行背景染色，而是动态赋予一个专属类名
-                // 让外部的 style.css 运用它的主题选择器来渲染那一圈“淡淡的绿圈”
-                btn.classList.add('correct-answer-hint');
-                btn.style.fontWeight = "bold";
-            }
-        });
-    });
-    document.getElementById('showCorrectBtn').style.display = "none";
+.control-panel button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(44, 62, 80, 0.08);
 }
 
-function submitAllAnswers() {
-    submitAndShowWrongOnly();
+/* 📝 生词本区域 */
+.vocab-notebook {
+    width: 100%;
+    max-width: 800px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 25px;
+    box-sizing: border-box;
+    border: 1px solid rgba(0,0,0,0.02);
 }
 
-// ==================== 🛠 *字词字典弹窗核心逻辑 ============================
-function openPop(el, i) {
-    currentIdx = i; const d = lessonData[i];
-    document.getElementById('popWord').innerText = d[0];
-    document.getElementById('popPinyin').innerText = `[${d[1]}]`;
-    document.getElementById('popEn').innerText = d[2]; 
-    document.getElementById('popBm').innerText = d[3];
-    
-    const pop = document.getElementById('buddyPopover'); 
-    const arrow = document.getElementById('popArrow');
-    pop.style.display = 'block'; 
-    
-    const rect = el.getBoundingClientRect(); 
-    const popRect = pop.getBoundingClientRect();
-    
-    let top = rect.top - popRect.height - 15; 
-    let left = rect.left + (rect.width / 2) - (popRect.width / 2);
-    
-    if (left + popRect.width > window.innerWidth - 15) left = window.innerWidth - popRect.width - 15;
-    if (left < 15) left = 15;
-    
-    arrow.style.left = `${(rect.left + rect.width / 2) - left}px`; 
-    pop.style.top = `${top}px`; 
-    pop.style.left = `${left}px`;
+.notebook-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: var(--text-color);
 }
 
-function saveToNotebook(e) { 
-    e.stopPropagation(); 
-    if (!saved.includes(currentIdx)) { 
-        saved.push(currentIdx); 
-        localStorage.setItem('saved_104', JSON.stringify(saved)); 
-        renderNB(); 
-    } 
-    const btn = e.target; 
-    btn.innerText = "✓ 已存"; 
-    setTimeout(() => btn.innerText = "Copy 📋", 1000); 
+.clear-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: opacity 0.2s;
 }
 
-function renderNB() { 
-    const list = document.getElementById('notebookList'); 
-    if (saved.length === 0) { 
-        list.innerHTML = "<span style='color:#999; font-size:13px;'>点击词语 Copy 记录生词</span>"; 
-    } else { 
-        list.innerHTML = ""; 
-        saved.forEach(idx => { 
-            const item = lessonData[idx]; 
-            if(!item) return; 
-            
-            const div = document.createElement("div"); 
-            div.className = "notebook-item"; 
-            div.style.display = "inline-flex";
-            div.style.alignItems = "center";
-            div.style.gap = "6px";
-            div.style.cursor = "pointer";
+.clear-btn:hover { opacity: 0.9; }
 
-            const textSpan = document.createElement("span");
-            textSpan.innerText = item[0];
-            textSpan.onclick = (e) => { 
-                e.stopPropagation(); 
-                const target = document.querySelector(`ruby[data-word-index="${idx}"]`); 
-                if(target) { 
-                    target.scrollIntoView({behavior: "smooth", block: "center"}); 
-                    document.querySelectorAll('ruby').forEach(r => r.classList.remove('is-active')); 
-                    setTimeout(() => { 
-                        target.classList.add('is-active'); 
-                        openPop(target, idx); 
-                    }, 500); 
-                } 
-            }; 
-            div.appendChild(textSpan);
-
-            const deleteBtn = document.createElement("span");
-            deleteBtn.innerText = "×";
-            deleteBtn.style.color = "#e74c3c";
-            deleteBtn.style.fontWeight = "bold";
-            deleteBtn.style.padding = "0 2px";
-            deleteBtn.style.cursor = "pointer";
-            deleteBtn.style.borderRadius = "50%";
-            deleteBtn.style.transition = "all 0.2s";
-            
-            deleteBtn.onmouseenter = () => { deleteBtn.style.background = "#fce4e4"; };
-            deleteBtn.onmouseleave = () => { deleteBtn.style.background = "transparent"; };
-            
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation(); 
-                removeSingleWordFromNotebook(idx);
-            };
-            div.appendChild(deleteBtn);
-
-            list.appendChild(div); 
-        }); 
-    } 
+.notebook-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-function removeSingleWordFromNotebook(idx) {
-    saved = saved.filter(savedIdx => savedIdx !== idx);
-    localStorage.setItem('saved_104', JSON.stringify(saved)); 
-    renderNB(); 
-    if (saved.length === 0) {
-        document.getElementById('gameContainer').style.display = 'none'; 
-        document.getElementById('gameToggleBtn').innerText = "🎯 生词测试";
-    }
+.notebook-item {
+    background: rgba(52, 152, 219, 0.08);
+    color: #2980b9;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-function forceClearNotebook() { localStorage.removeItem('saved_104'); saved = []; renderNB(); document.getElementById('gameContainer').style.display = 'none'; document.getElementById('gameToggleBtn').innerText = "🎯 生词测试"; }
-function toggleGameMode() { const container = document.getElementById('gameContainer'); const btn = document.getElementById('gameToggleBtn'); if (container.style.display === 'block') { container.style.display = 'none'; btn.innerText = "🎯 生词测试"; } else { if (saved.length < 1) { alert("生词本是空的哦！要先在正文里点生词进行 Copy 收集！"); return; } container.style.display = 'block'; btn.innerText = "📖 返回课文"; startQuizGame(); container.scrollIntoView({behavior: "smooth"}); } }
-function startQuizGame() { quizData = [...saved].sort(() => Math.random() - 0.5); currentQuizIdx = 0; loadQuestion(); }
-
-function loadQuestion() { 
-    isLocked = false; 
-    const targetIdx = quizData[currentQuizIdx]; 
-    const data = lessonData[targetIdx]; 
-    document.getElementById('quizProgress').innerText = `第 ${currentQuizIdx + 1} / ${quizData.length} 题`; 
-    document.getElementById('quizQuestion').innerText = data[0]; 
-    document.getElementById('quizPinyin').innerText = `[${data[1]}]`; 
-    
-    const correctStr = (data[2].trim() + "；" + data[3].trim()); 
-    let options = [correctStr]; 
-    let others = lessonData.filter(d => d[1] !== "" && d[0] !== data[0]).map(d => (d[2].trim() + "；" + d[3].trim())); 
-    others = [...new Set(others)].filter(s => s !== correctStr).sort(() => Math.random() - 0.5); 
-    
-    for(let i=0; i<3; i++) { if(others[i]) options.push(others[i]); } 
-    options.sort(() => Math.random() - 0.5); 
-    
-    const optDiv = document.getElementById('quizOptions'); 
-    optDiv.innerHTML = ""; 
-    options.forEach(opt => { 
-        const b = document.createElement('button'); 
-        b.className = 'quiz-opt-btn'; 
-        b.innerText = opt; 
-        b.onclick = () => { 
-            if(isLocked || b.classList.contains('wrong')) return; 
-            if(opt.trim() === correctStr.trim()) { 
-                isLocked = true; 
-                b.classList.add('correct'); 
-                setTimeout(() => { 
-                    currentQuizIdx++; 
-                    if(currentQuizIdx < quizData.length) loadQuestion(); 
-                    else { alert("🎉 完成测试！你真棒！"); toggleGameMode(); } 
-                }, 800); 
-            } else { b.classList.add('wrong'); } 
-        }; 
-        optDiv.appendChild(b); 
-    }); 
+[data-theme="dark"] .notebook-item {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
 }
 
-function toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme')==='dark'?'':'dark'); }
+.notebook-item:hover {
+    background: #3498db;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* 🧩 生词测试游戏区域 */
+.game-container {
+    width: 100%;
+    max-width: 800px;
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(142, 68, 173, 0.12);
+    margin-bottom: 25px;
+    box-sizing: border-box;
+    border: 1px solid rgba(142, 68, 173, 0.05);
+}
+
+.quiz-card {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.quiz-question {
+    font-size: 36px;
+    font-weight: bold;
+    color: #8e44ad;
+    letter-spacing: 2px;
+}
+
+.quiz-pinyin {
+    font-size: 16px;
+    color: #7f8c8d;
+    margin-bottom: 25px;
+}
+
+.quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.quiz-opt-btn {
+    padding: 14px 20px;
+    background: var(--bg-color);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    border-radius: 10px;
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.quiz-opt-btn:hover {
+    background: var(--card-bg);
+    border-color: #8e44ad;
+    box-shadow: 0 4px 10px rgba(142, 68, 173, 0.08);
+    transform: translateY(-1px);
+}
+
+.quiz-opt-btn.correct {
+    background: #2ecc71 !important;
+    color: white !important;
+    border-color: #2ecc71;
+    box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+}
+
+.quiz-opt-btn.wrong {
+    background: #e74c3c !important;
+    color: white !important;
+    border-color: #e74c3c;
+    cursor: not-allowed;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* 📖 课文文章卡片 */
+.article-card {
+    width: 100%;
+    max-width: 800px;
+    background: var(--card-bg);
+    padding: 50px 60px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    box-sizing: border-box;
+    border: 1px solid rgba(0,0,0,0.01);
+}
+
+h1 {
+    text-align: center;
+    font-size: 32px;
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: 40px;
+    color: var(--text-color);
+    letter-spacing: 2px;
+}
+
+#content p {
+    text-align: justify;
+    text-justify: inter-ideograph;
+    margin-bottom: 35px;
+    font-size: 19px;
+    letter-spacing: 1.5px;
+    color: var(--text-color);
+}
+
+/* 🎯 段落编号：悬浮小书签样式 */
+.p-index {
+    display: inline-block;
+    font-size: 12px;
+    background: #eef3f0;
+    color: #2c3e50;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    user-select: none;
+    border: 1px solid #d2ded7;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+[data-theme="dark"] .p-index {
+    background: #2d3748;
+    color: #a0aec0;
+    border-color: #4a5568;
+}
+
+/* 🍊 拼音标注（Ruby）极致互动 */
+ruby {
+    ruby-position: over;
+    cursor: pointer;
+    padding: 0 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+ruby:hover, ruby.is-active {
+    background: #fff3cd; /* 悬停时字底变浅黄 */
+    color: #d35400;      /* 字变暖橙色 */
+}
+
+[data-theme="dark"] ruby:hover, [data-theme="dark"] ruby.is-active {
+    background: #4a3716;
+    color: #f39c12;
+}
+
+/* 🙈 全篇所有拼音默认隐藏 */
+#content rt {
+    opacity: 0;
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    font-size: 12px;
+    color: var(--ruby-color);
+    font-family: "PingFang SC", "Lucida Grande", sans-serif;
+    padding-bottom: 5px;
+}
+
+/* 🌟 当鼠标指到（hover）或手机点击激活（.is-active）时拼音浮现 */
+#content ruby:hover rt, 
+#content ruby.is-active rt {
+    opacity: 1;
+}
+
+/* 💬 字典词摘气泡弹窗（Popover） */
+.buddy-popover {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 14px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    padding: 18px;
+    width: 270px;
+    box-sizing: border-box;
+    border: 1px solid var(--input-border);
+}
+
+.pop-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--input-border);
+    padding-bottom: 8px;
+}
+
+.pop-title {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.pop-pinyin {
+    font-size: 14px;
+    color: #e67e22;
+    font-weight: 600;
+}
+
+.pop-box {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 14px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.pop-tag {
+    font-size: 11px;
+    font-weight: bold;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.pop-en { color: #2980b9; }
+.pop-en .pop-tag { background: #3498db; }
+
+.pop-bm { color: #c0392b; }
+.pop-bm .pop-tag { background: #e74c3c; }
+
+.pop-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--input-border);
+}
+
+.pop-btn-copy {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.pop-btn-copy:hover { background: #27ae60; }
+
+.pop-arrow {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--card-bg);
+    transform: translateX(-50%);
+}
+
+/* ==========================================================================
+   ✨ 10道阅读理解选择题特制高级动态交互美化样式
+   ========================================================================== */
+.quiz-choice-btn {
+    position: relative;
+    transition: all 0.15s ease !important;
+}
+
+/* 允许用户在点击时有一个轻微的打击感压陷反馈 */
+.quiz-choice-btn:active:not(:disabled) {
+    transform: scale(0.995);
+}
+
+#quizContainer button:disabled {
+    cursor: not-allowed !important;
+}
+
+/* ☀️ 正常日间模式默认样式 */
+#quizSection h2,
+#quizContainer div {
+    color: #2c3e50 !important; 
+}
+.quiz-choice-btn {
+    background: #ffffff !important;
+    color: #2c3e50 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.quiz-choice-btn:hover:not(:disabled) {
+    background: #f8fafc !important;
+}
+
+/* 🌟 日间模式下选中的强效视觉标记 */
+.quiz-choice-btn.selected {
+    background: #f0f8ff !important;
+    border: 2px solid #2980b9 !important; 
+    color: #2980b9 !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
+}
+
+/* 💡 新增：日间模式下正确答案的淡淡绿圈暗示 */
+.quiz-choice-btn.correct-answer-hint {
+    border: 1px solid #2ecc71 !important; 
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.15) !important; 
+}
+
+/* 🌟 🌙 暗黑模式下的无缝换肤接管 */
+[data-theme="dark"] #quizSection h2,
+[data-theme="dark"] #quizContainer,
+[data-theme="dark"] #quizContainer div {
+    color: #e0e0e0 !important; 
+}
+
+/* 暗黑模式未选中按钮状态：变深灰低调底框 */
+[data-theme="dark"] .quiz-choice-btn {
+    background: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #475569 !important;
+}
+[data-theme="dark"] .quiz-choice-btn:hover:not(:disabled) {
+    background: #3d3d3d !important;
+}
+
+/* 🌟 🌙 暗黑模式下选中的强效视觉标记 */
+[data-theme="dark"] .quiz-choice-btn.selected {
+    background: #1a252f !important;      
+    border: 2px solid #3498db !important; 
+    color: #5dade2 !important;            
+    font-weight: 700 !important;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
+}
+
+/* 💡 新增：暗黑模式下正确答案的淡淡绿圈暗示 */
+[data-theme="dark"] .quiz-choice-btn.correct-answer-hint {
+    border: 1px solid #2ecc71 !important; 
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.25) !important;
+}
+
+/* ==========================================================================
+   👨‍🏫 文本赏析板块特制高级交互与跨模式主题样式
+   ========================================================================== */
+
+/* ☀️ 日间模式默认国风淡紫赏析色调 */
+.teacher-p-analysis, [id^="q-analysis-"] {
+    background: #faf5ff !important;
+    border-left: 3px solid #af7ac5 !important;
+    color: #6c3483 !important;
+}
+#teacherArticleAnalysis {
+    background: #f3e5f5 !important;
+    border-left: 4px solid #9b59b6 !important;
+    color: #4a148c !important;
+}
+
+/* 🌙 暗黑模式护眼暗紫调配置 */
+[data-theme='dark'] #teacherArticleAnalysis {
+    background: #251833 !important;       
+    border-left: 4px solid #bb86fc !important;   
+    color: #e1bee7 !important;             
+}
+[data-theme='dark'] .teacher-p-analysis, 
+[data-theme='dark'] [id^="q-analysis-"] {
+    background: #1d1226 !important;       
+    border-left: 3px solid #a278b5 !important;   
+    color: #d7bde2 !important;             
+}
+
+/* 📱 响应式适配移动端手机 */
+@media (max-width: 600px) {
+    body { padding: 15px 10px; }
+    .article-card { padding: 30px 20px; }
+    #content p { font-size: 17px; }
+    .quiz-options { grid-template-columns: 1fr; }
+}
