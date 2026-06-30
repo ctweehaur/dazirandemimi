@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 浅绿质感完全适配版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 提交即时变绿版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -210,7 +210,7 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板的一键联动
+// 👁️ 控制开关：切换文本赏析面板
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
@@ -275,11 +275,13 @@ function submitAndShowWrongOnly() {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 如果学生这道题做【对】了 -> 追加一个打勾后缀 (✅)，不再有任何额外边框渲染
+            // 🟢 核心改动：如果学生这道题做【对】了 -> 提交时立刻赋予 correct-answer-hint 类名，瞬间切换为精美浅绿肤色！
             if (btn === selectedBtn && studentLetter === q.answer) {
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
+                btn.classList.add('correct-answer-hint');
+                btn.style.fontWeight = "bold";
             }
 
             // 如果学生做【错】了 -> 将学生的错项独立强染红底白字
@@ -335,8 +337,7 @@ function revealRealCorrectAnswers() {
                 btn.innerText = currentText + "  (✅)";
                 btn.style.fontWeight = "bold";
                 
-                // 💡 优雅平替：直接注入 CSS 浅绿提示皮肤！
-                // 这时如果原本有 selected (蓝圈)，CSS 里的优先级规则会利落地将其切换为浅绿色！
+                // 把正确答案全部染成浅绿皮肤（之前没做对的正确项，此时也会同步优雅亮绿）
                 btn.classList.add('correct-answer-hint');
             }
         });
@@ -448,6 +449,7 @@ function removeSingleWordFromNotebook(idx) {
     }
 }
 
+// 游戏重载
 function forceClearNotebook() { localStorage.removeItem('saved_104'); saved = []; renderNB(); document.getElementById('gameContainer').style.display = 'none'; document.getElementById('gameToggleBtn').innerText = "🎯 生词测试"; }
 function toggleGameMode() { const container = document.getElementById('gameContainer'); const btn = document.getElementById('gameToggleBtn'); if (container.style.display === 'block') { container.style.display = 'none'; btn.innerText = "🎯 生词测试"; } else { if (saved.length < 1) { alert("生词本是空的哦！要先在正文里点生词进行 Copy 收集！"); return; } container.style.display = 'block'; btn.innerText = "📖 返回课文"; startQuizGame(); container.scrollIntoView({behavior: "smooth"}); } }
 function startQuizGame() { quizData = [...saved].sort(() => Math.random() - 0.5); currentQuizIdx = 0; loadQuestion(); }
