@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 一键全局赏析纯净版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 主题无缝解耦版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -30,7 +30,7 @@ window.onload = function() {
     });
 };
 
-// 📖 正文渲染器：支持华文首行空两格，支持一键切换全局深度文本赏析
+// 📖 正文渲染器：支持华文首行空两格，并为深度文本赏析预留 DOM 节点
 function render() {
     const cnt = document.getElementById('content'); 
     cnt.innerHTML = "";
@@ -276,7 +276,7 @@ function submitAndShowWrongOnly() {
             btn.disabled = true; 
             btn.style.boxShadow = "none";
 
-            // 💡 新增：如果学生这道题做【对】了 -> 在其后面追加 (✅)，但不强染绿底（保持原本选中蓝）
+            // 如果学生这道题做【对】了 -> 在其后面追加 (✅)
             if (btn === selectedBtn && studentLetter === q.answer) {
                 if (!btn.innerText.includes("  (✅)")) btn.innerText = btn.innerText + "  (✅)";
             }
@@ -326,7 +326,7 @@ function revealRealCorrectAnswers() {
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 如果之前没加过对勾后缀，则补上
+                // 💡 修复去重：只有在没有 ✅ 的情况下才追加，防止原本就答对的题目出现双重对勾
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
@@ -340,10 +340,6 @@ function revealRealCorrectAnswers() {
         });
     });
     document.getElementById('showCorrectBtn').style.display = "none";
-}
-
-function submitAllAnswers() {
-    submitAndShowWrongOnly();
 }
 
 // ==================== 🛠 *字词字典弹窗核心逻辑 ============================
