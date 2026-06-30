@@ -78,7 +78,7 @@ function render() {
             paragraphElement.insertBefore(s, paragraphElement.firstChild); 
             cnt.appendChild(paragraphElement);
 
-            // 👁️ 赏析节点预渲染：颜色和皮肤交由 css 的 !important 处理
+            // 👁️ 赏析节点预渲染
             if (typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
                 let pAnalysis = document.createElement("div");
                 pAnalysis.id = `p-analysis-${pNum}`;
@@ -90,7 +90,6 @@ function render() {
                 pAnalysis.style.textIndent = "0";
                 pAnalysis.innerHTML = `<strong>🔍 第 ${pNum} 段文本赏析：</strong>${lessonTeacherAnalysis.paragraphs[pNum]}`;
                 
-                // 根据当前的全局开关状态决定初始是否显示
                 pAnalysis.style.display = isTeacherMode ? "block" : "none";
                 cnt.appendChild(pAnalysis);
             }
@@ -118,7 +117,7 @@ function render() {
     finalizeParagraph(p);
 }
 
-// 🎯 选择题渲染器：支持动态读取 questions.js 里的问题赏析
+// 🎯 选择题渲染器
 function renderMultipleChoiceQuizzes() {
     if (typeof quizDataList === 'undefined' || quizDataList.length === 0) return;
     
@@ -133,7 +132,6 @@ function renderMultipleChoiceQuizzes() {
     // 恢复控制按钮的初始显隐状态
     document.getElementById('submitQuizBtn').style.display = "inline-block";
     document.getElementById('submitQuizBtn').disabled = false;
-    document.getElementById('submitQuizBtn').style.background = "#34495e";
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
     
     document.getElementById('retryQuizBtn').style.display = "none";
@@ -150,7 +148,6 @@ function renderMultipleChoiceQuizzes() {
         qText.style.fontWeight = "bold";
         qText.style.fontSize = "16px";
         qText.style.marginBottom = "10px";
-        qText.style.color = "#2c3e50";
         qText.innerHTML = `${q.id}. ${q.question.replace(/\n/g, '<br>')}`;
         qBox.appendChild(qText);
 
@@ -191,35 +188,18 @@ function renderMultipleChoiceQuizzes() {
             btn.style.textAlign = "left";
             btn.style.margin = "6px 0";
             btn.style.padding = "10px 15px";
-            btn.style.border = "1px solid #dcdde1";
             btn.style.borderRadius = "6px";
-            btn.style.background = "#fff";
             btn.style.cursor = "pointer";
             btn.style.fontSize = "14px";
-            btn.style.transition = "all 0.1s";
-
-            btn.onmouseenter = () => { if(!btn.classList.contains('selected') && !btn.disabled) btn.style.background = "#f5f6fa"; };
-            btn.onmouseleave = () => { if(!btn.classList.contains('selected') && !btn.disabled) btn.style.background = "#fff"; };
 
             btn.onclick = () => {
                 if (btn.disabled) return;
                 
                 Array.from(optionsBox.children).forEach(b => {
                     b.classList.remove('selected');
-                    b.style.background = "#fff";
-                    b.style.borderColor = "#dcdde1";
-                    b.style.color = "inherit";
-                    b.style.fontWeight = "normal";
-                    b.style.boxShadow = "none";
                 });
 
                 btn.classList.add('selected');
-                btn.style.background = "#f0f8ff";          
-                btn.style.borderColor = "#2980b9";         
-                btn.style.color = "#2980b9";               
-                btn.style.fontWeight = "700";              
-                btn.style.boxShadow = "0 4px 15px rgba(41, 128, 185, 0.15)"; 
-
                 userSelectedAnswers[q.id] = finalOptText;
             };
             optionsBox.appendChild(btn);
@@ -230,7 +210,7 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板的显示与隐藏（实现一键全部展开、一键全部收起）
+// 👁️ 控制开关：切换文本赏析面板的一键联动
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
@@ -243,7 +223,6 @@ function toggleTeacherMode() {
         btn.style.background = "#9b59b6";
     }
     
-    // 2. 控制总览面板显隐
     const topAnalysis = document.getElementById('teacherArticleAnalysis');
     const topAnalysisContent = document.getElementById('teacherArticleAnalysisContent');
     if (topAnalysis && topAnalysisContent) {
@@ -255,13 +234,11 @@ function toggleTeacherMode() {
         }
     }
 
-    // 3. 批量一键隐藏/展现正文各段赏析
     const pPanels = document.querySelectorAll('.teacher-p-analysis');
     pPanels.forEach(panel => {
         panel.style.display = isTeacherMode ? "block" : "none";
     });
 
-    // 4. 批量一键隐藏/展现选择题赏析
     quizDataList.forEach(q => {
         const qPanel = document.getElementById(`q-analysis-${q.id}`);
         if (qPanel) {
@@ -297,16 +274,14 @@ function submitAndShowWrongOnly() {
 
         buttons.forEach(btn => {
             btn.disabled = true; 
-            btn.style.background = "#fff";
-            btn.style.color = "inherit";
-            btn.style.borderColor = "#dcdde1";
             btn.style.boxShadow = "none";
 
+            // 💡 新增：如果学生这道题做【对】了 -> 在其后面追加 (✅)，但不强染绿底（保持原本选中蓝）
             if (btn === selectedBtn && studentLetter === q.answer) {
-                btn.style.background = "#fff";
-                btn.style.color = "inherit";
-                btn.style.borderColor = "#dcdde1";
+                if (!btn.innerText.includes("  (✅)")) btn.innerText = btn.innerText + "  (✅)";
             }
+
+            // 如果学生做【错】了 -> 将学生的错项染红打叉
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -337,10 +312,10 @@ function retryQuizAnswers() {
     
     document.getElementById('submitQuizBtn').style.display = "inline-block";
     document.getElementById('submitQuizBtn').disabled = false;
-    document.getElementById('submitQuizBtn').style.background = "#34495e";
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
 }
 
+// 揭晓真正的谜底（将正确答案彻底变绿显现）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
@@ -351,14 +326,16 @@ function revealRealCorrectAnswers() {
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
+                // 如果之前没加过对勾后缀，则补上
                 if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
-                    if (!btn.innerText.includes("  (❌️)")) {
-                        btn.style.fontWeight = "bold";
-                        btn.style.color = "#2c3e50";
-                        btn.style.borderColor = "#2ecc71"; 
-                    }
                 }
+                
+                // 彻底强行绿显正确答案（不受黑夜白天模式影响，确保清晰可见）
+                btn.style.background = "#2ecc71";
+                btn.style.color = "white";
+                btn.style.borderColor = "#2ecc71"; 
+                btn.style.fontWeight = "bold";
             }
         });
     });
