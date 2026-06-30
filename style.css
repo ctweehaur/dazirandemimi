@@ -199,16 +199,16 @@ body {
 /* ==========================================================================
    ⚙️ 针对生词测试大字标题（ID: quizQuestion）的专属跨模式控色补丁
    ========================================================================== */
-/* ☀️ 日间模式下大生词维持高级紫调 */
+/* ☀️ 日间模式下大生词换成高档的国风深墨黑 */
 #quizQuestion {
     font-size: 36px;
     font-weight: bold;
-    color: #8e44ad !important;
+    color: #2c3e50 !important;
     letter-spacing: 2px;
     transition: color 0.3s ease;
 }
 
-/* 🌙 暗黑模式适配：无论 JS 内部如何重载，强制将其洗成纯白色！ */
+/* 🌙 暗黑模式适配：大生词自动转为清晰的纯白色 */
 [data-theme="dark"] #quizQuestion {
     color: #ffffff !important;
 }
