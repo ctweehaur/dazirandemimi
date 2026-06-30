@@ -401,6 +401,20 @@ ruby:hover, ruby.is-active {
     cursor: not-allowed !important;
 }
 
+/* ☀️ 正常日间模式默认样式 */
+#quizSection h2,
+#quizContainer div {
+    color: #2c3e50 !important; /* 确保日间题干高可读性 */
+}
+.quiz-choice-btn {
+    background: #ffffff !important;
+    color: #2c3e50 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+.quiz-choice-btn:hover:not(:disabled) {
+    background: #f8fafc !important;
+}
+
 /* 🌟 日间模式下选中的强效视觉标记 */
 .quiz-choice-btn.selected {
     background: #f0f8ff !important;
@@ -410,40 +424,54 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
 }
 
-/* 🌟 🌙 暗黑模式下选中的强效视觉标记 */
+/* 🌟 🌙 暗黑模式下的无缝换肤接管 */
+[data-theme="dark"] #quizSection h2,
+[data-theme="dark"] #quizContainer,
+[data-theme="dark"] #quizContainer div {
+    color: #e0e0e0 !important; /* 彻底提亮黑夜下的题目和 I II III 文本 */
+}
+
+/* 暗黑模式未选中按钮状态：变深灰低调底框，杜绝瞎眼纯白 */
+[data-theme="dark"] .quiz-choice-btn {
+    background: #2d2d2d !important;
+    color: #e0e0e0 !important;
+    border: 1px solid #475569 !important;
+}
+[data-theme="dark"] .quiz-choice-btn:hover:not(:disabled) {
+    background: #3d3d3d !important;
+}
+
+/* 🌟 🌙 暗黑模式下选中的强效视觉标记 (已修正语法小错误) */
 [data-theme="dark"] .quiz-choice-btn.selected {
     background: #1a252f !important;      /* 沉稳黑蓝色暗底 */
     border: 2px solid #3498db !important; /* 科技荧光蓝边框 */
     color: #5dade2 !important;            /* 浅亮蓝字体 */
     font-weight: 700 !important;
-    box-shadow: 0 4px 15px rgba(41, 128, 185, 0.15 extremes); 
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
 }
 
-// ==========================================================================
-// 👨‍🏫 新增：文本赏析功能专配卡片样式（支持一键总控与夜间柔和配色）
-// ==========================================================================
+/* ==========================================================================
+   👨‍🏫 文本赏析板块特制高级交互与跨模式主题样式
+   ========================================================================== */
 
 /* ☀️ 日间模式默认国风淡紫赏析色调 */
-.teacher-p-analysis, #teacherArticleAnalysis {
+.teacher-p-analysis, [id^="q-analysis-"] {
     background: #faf5ff !important;
     border-left: 3px solid #af7ac5 !important;
     color: #6c3483 !important;
-    transition: background 0.3s, color 0.3s;
 }
-
 #teacherArticleAnalysis {
     background: #f3e5f5 !important;
     border-left: 4px solid #9b59b6 !important;
     color: #4a148c !important;
 }
 
-/* 🌙 暗黑模式护眼暗紫调配置（自动在 [data-theme='dark'] 激活时无缝接管） */
+/* 🌙 暗黑模式护眼暗紫调配置（自动在切换时生效） */
 [data-theme='dark'] #teacherArticleAnalysis {
     background: #251833 !important;       /* 极深沉无眩光暗紫底 */
-    border-left: 4px solid #bb86fc !important;   /* 高反差柔和霓虹浅紫线 */
-    color: #e1bee7 !important;             /* 护眼高清晰度淡芋紫字 */
+    border-left: 4px solid #bb86fc !important;   /* 柔和霓虹浅紫线 */
+    color: #e1bee7 !important;             /* 护眼淡芋紫字 */
 }
-
 [data-theme='dark'] .teacher-p-analysis, 
 [data-theme='dark'] [id^="q-analysis-"] {
     background: #1d1226 !important;       /* 柔和暗紫色背景 */
