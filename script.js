@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 文本赏析完美订正版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 一键全局赏析纯净版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -30,7 +30,7 @@ window.onload = function() {
     });
 };
 
-// 📖 正文渲染器：支持华文首行空两格，并为深度文本赏析预留 DOM 节点
+// 📖 正文渲染器：支持华文首行空两格，支持一键切换全局深度文本赏析
 function render() {
     const cnt = document.getElementById('content'); 
     cnt.innerHTML = "";
@@ -78,38 +78,22 @@ function render() {
             paragraphElement.insertBefore(s, paragraphElement.firstChild); 
             cnt.appendChild(paragraphElement);
 
-            // 👁️ 赏析节点预渲染：为每一段注入一个带独立 ID 的赏析容器
+            // 👁️ 赏析节点预渲染：移除单个收起按钮，恢复纯粹的卡片内容展示
             if (typeof lessonTeacherAnalysis !== 'undefined' && lessonTeacherAnalysis.paragraphs && lessonTeacherAnalysis.paragraphs[pNum]) {
                 let pAnalysis = document.createElement("div");
                 pAnalysis.id = `p-analysis-${pNum}`;
                 pAnalysis.className = "teacher-p-analysis";
                 pAnalysis.style.background = "#faf5ff";
                 pAnalysis.style.borderLeft = "3px solid #af7ac5";
-                pAnalysis.style.padding = "12px 15px 35px 15px"; // 底部预留空间放收起按钮
+                pAnalysis.style.padding = "10px 15px"; // 恢复紧凑美观的外边距
                 pAnalysis.style.margin = "5px 0 20px 0";
                 pAnalysis.style.fontSize = "13.5px";
                 pAnalysis.style.color = "#6c3483";
                 pAnalysis.style.borderRadius = "4px";
                 pAnalysis.style.textIndent = "0";
-                pAnalysis.style.position = "relative";
                 pAnalysis.innerHTML = `<strong>🔍 第 ${pNum} 段文本赏析：</strong>${lessonTeacherAnalysis.paragraphs[pNum]}`;
                 
-                // 新增：动态创建单段赏析的【收起按钮】
-                let closeBtn = document.createElement("span");
-                closeBtn.innerText = "[ 收起该段赏析 ↩️ ]";
-                closeBtn.style.position = "absolute";
-                closeBtn.style.bottom = "8px";
-                closeBtn.style.right = "15px";
-                closeBtn.style.fontSize = "12px";
-                closeBtn.style.color = "#af7ac5";
-                closeBtn.style.cursor = "pointer";
-                closeBtn.style.fontWeight = "bold";
-                closeBtn.onclick = function() {
-                    pAnalysis.style.display = "none";
-                };
-                pAnalysis.appendChild(closeBtn);
-
-                // 根据当前的赏析全局开关状态决定初始是否显示
+                // 根据当前的全局开关状态决定初始是否显示
                 pAnalysis.style.display = isTeacherMode ? "block" : "none";
                 cnt.appendChild(pAnalysis);
             }
@@ -173,34 +157,19 @@ function renderMultipleChoiceQuizzes() {
         qText.innerHTML = `${q.id}. ${q.question.replace(/\n/g, '<br>')}`;
         qBox.appendChild(qText);
 
-        // 👁️ 题目分析节点预渲染：为每道题生成独立的赏析板容器
+        // 👁️ 题目分析节点预渲染
         if (q.teacherAnalysis) {
             let qAnalysis = document.createElement("div");
             qAnalysis.id = `q-analysis-${q.id}`;
             qAnalysis.style.background = "#faf5ff";
             qAnalysis.style.borderLeft = "3px solid #af7ac5";
-            qAnalysis.style.padding = "8px 12px 28px 12px";
+            qAnalysis.style.padding = "8px 12px";
             qAnalysis.style.marginBottom = "10px";
             qAnalysis.style.fontSize = "13px";
             qAnalysis.style.color = "#6c3483";
             qAnalysis.style.borderRadius = "4px";
-            qAnalysis.style.position = "relative";
             qAnalysis.innerHTML = `<strong>📐 设题意图与核心考点：</strong>${q.teacherAnalysis}`;
             
-            // 为选择题解析同样添加独立收起按钮
-            let qCloseBtn = document.createElement("span");
-            qCloseBtn.innerText = "[ 收起该题赏析 ↩️ ]";
-            qCloseBtn.style.position = "absolute";
-            qCloseBtn.style.bottom = "4px";
-            qCloseBtn.style.right = "12px";
-            qCloseBtn.style.fontSize = "11px";
-            qCloseBtn.style.color = "#af7ac5";
-            qCloseBtn.style.cursor = "pointer";
-            qCloseBtn.onclick = function() {
-                qAnalysis.style.display = "none";
-            };
-            qAnalysis.appendChild(qCloseBtn);
-
             qAnalysis.style.display = isTeacherMode ? "block" : "none";
             qBox.appendChild(qAnalysis);
         }
@@ -267,12 +236,11 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 👁️ 控制开关：切换文本赏析面板的显示与隐藏（一键全部展开/一键全部收起）
+// 👁️ 控制开关：切换文本赏析面板的显示与隐藏（实现一键全部展开、一键全部收起）
 function toggleTeacherMode() {
     isTeacherMode = !isTeacherMode;
     const btn = document.getElementById('teacherToggleBtn');
     
-    // 1. 改变按钮的外观样式
     if (isTeacherMode) {
         btn.innerText = "❌ 关闭文本赏析";
         btn.style.background = "#7d3c98";
@@ -281,7 +249,7 @@ function toggleTeacherMode() {
         btn.style.background = "#9b59b6";
     }
     
-    // 2. 控制课文顶部大赏析板的显隐与内容刷新
+    // 2. 控制总览面板显隐
     const topAnalysis = document.getElementById('teacherArticleAnalysis');
     const topAnalysisContent = document.getElementById('teacherArticleAnalysisContent');
     if (topAnalysis && topAnalysisContent) {
@@ -293,13 +261,13 @@ function toggleTeacherMode() {
         }
     }
 
-    // 3. 循环一键切替正文各段赏析板的显显
+    // 3. 批量一键隐藏/展现正文各段赏析
     const pPanels = document.querySelectorAll('.teacher-p-analysis');
     pPanels.forEach(panel => {
         panel.style.display = isTeacherMode ? "block" : "none";
     });
 
-    // 4. 循环一键切替题目赏析板的显隐
+    // 4. 批量一键隐藏/展现选择题赏析
     quizDataList.forEach(q => {
         const qPanel = document.getElementById(`q-analysis-${q.id}`);
         if (qPanel) {
@@ -379,6 +347,7 @@ function retryQuizAnswers() {
     document.getElementById('submitQuizBtn').innerText = "提交检查 🚀";
 }
 
+// 揭晓谜底（不要高光，只在后面追加 ✅）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
