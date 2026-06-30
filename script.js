@@ -195,7 +195,7 @@ function renderMultipleChoiceQuizzes() {
 
 // ==================== 🎯 核心：错题隐藏式批改控制引擎 ====================
 
-// 【流程 1/3】：学生点击“提交检查” -> 只批改学生的选择状态，绝不提前染绿正确选项
+// 【流程 1/3】：学生点击“提交检查” -> 只批改学生的选择状态，绝不提前染绿或标注正确选项
 function submitAndShowWrongOnly() {
     const totalQuestions = quizDataList.length;
     const answeredCount = Object.keys(userSelectedAnswers).length;
@@ -230,7 +230,7 @@ function submitAndShowWrongOnly() {
             btn.style.borderColor = "#dcdde1";
             btn.style.boxShadow = "none";
 
-            // 💡 如果选对了 -> 将当前项染绿打勾
+            // 💡 如果选对了 -> 将当前项染绿打勾（这里保留绿底因为是学生自己选出来的，让他有成就感）
             if (btn === selectedBtn && studentLetter === q.answer) {
                 btn.style.background = "#2ecc71";
                 btn.style.color = "white";
@@ -238,7 +238,7 @@ function submitAndShowWrongOnly() {
                 if (!btn.innerText.includes("  (✅️)")) btn.innerText = btn.innerText + "  (✅️)";
             }
             
-            // 💡 如果选错了 -> 将错项染红打叉（重点：此时真正的正确项绝不亮绿，保持全白）
+            // 💡 如果选错了 -> 将错项染红打叉（重点：此时真正的正确项绝不打勾也不亮绿，保持全白）
             if (btn === selectedBtn && studentLetter !== q.answer) {
                 btn.style.background = "#e74c3c";
                 btn.style.color = "white";
@@ -276,7 +276,7 @@ function retryQuizAnswers() {
         btn.style.boxShadow = "none";
         
         // 剥离打分时追加的各种状态小挂件文本
-        btn.innerText = btn.innerText.replace("  (✅️)", "").replace("  (❌️)", "").replace("  (★ 正确答案)", "");
+        btn.innerText = btn.innerText.replace("  (✅️)", "").replace("  (❌️)", "").replace("  (✅)", "");
     });
 
     // 内存数据彻底离场
@@ -293,7 +293,7 @@ function retryQuizAnswers() {
     document.getElementById('showCorrectBtn').style.display = "none";
 }
 
-// 【流程 3/3】：学生点击“查看正确答案” -> 此时才真正揭晓谜底
+// 【流程 3/3】：学生点击“查看正确答案” -> 此时揭晓谜底（不要高光，只在后面加 ✅）
 function revealRealCorrectAnswers() {
     quizDataList.forEach(q => {
         const qBox = document.querySelector(`div[data-q-id="${q.id}"]`);
@@ -303,13 +303,17 @@ function revealRealCorrectAnswers() {
             const btnOriginalText = btn.getAttribute("data-original-text");
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
-            // 抓出底层的真正答案直接高亮染绿提示
+            // 抓出底层的真正答案：保持原本底色，只在文字后面静静地加上 (✅)
             if (btnLetter === q.answer) {
-                btn.style.background = "#2ecc71";
-                btn.style.color = "white";
-                btn.style.borderColor = "#2ecc71";
-                if (!btn.innerText.includes("  (★ 正确答案)")) {
-                    btn.innerText = btn.innerText + "  (★ 正确答案)";
+                if (!btn.innerText.includes("  (✅)")) {
+                    btn.innerText = btn.innerText + "  (✅)";
+                    
+                    // 如果这题学生选错了，正确按钮原本是白色的，我们给它的文本加粗加黑一下，显得醒目一些（但不要背景色）
+                    if (!btn.innerText.includes("  (❌️)")) {
+                        btn.style.fontWeight = "bold";
+                        btn.style.color = "#2c3e50";
+                        btn.style.borderColor = "#2ecc71"; // 边框稍微带一点点绿暗示
+                    }
                 }
             }
         });
