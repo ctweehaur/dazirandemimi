@@ -1,5 +1,5 @@
 // ==========================================================================
-// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 终极去重纯净版)
+// ⚙️ 全互动式华文教学系统阅读器大脑 - script.js (2026 最终纯净去高亮版)
 // ==========================================================================
 
 let currentIdx = -1; 
@@ -188,9 +188,7 @@ function renderMultipleChoiceQuizzes() {
             btn.style.textAlign = "left";
             btn.style.margin = "6px 0";
             btn.style.padding = "10px 15px";
-            btn.style.border = "1px solid #dcdde1";
             btn.style.borderRadius = "6px";
-            btn.style.background = "#fff";
             btn.style.cursor = "pointer";
             btn.style.fontSize = "14px";
 
@@ -267,7 +265,7 @@ function submitAndShowWrongOnly() {
         const buttons = qBox.querySelectorAll('.quiz-choice-btn');
         const studentOriginalText = userSelectedAnswers[q.id];
 
-        // 依靠底层唯一映射来定位按钮，杜绝依据变化多端的 innerText 查找
+        // 依靠唯一匹配定位选中的按钮
         let selectedBtn = null;
         buttons.forEach(btn => {
             if (btn.getAttribute("data-original-text") === studentOriginalText) { selectedBtn = btn; }
@@ -281,7 +279,7 @@ function submitAndShowWrongOnly() {
 
             // 如果学生这道题做【对】了 -> 在其后面追加 (✅)
             if (btn === selectedBtn && studentLetter === q.answer) {
-                if (!btn.innerText.includes(" (✅)")) {
+                if (!btn.innerText.includes("  (✅)")) {
                     btn.innerText = btn.innerText + "  (✅)";
                 }
             }
@@ -331,18 +329,19 @@ function revealRealCorrectAnswers() {
             const btnLetter = btnOriginalText.trim().charAt(0); 
 
             if (btnLetter === q.answer) {
-                // 终极清洗机制：先把可能包含的错勾全部剔除洗净，确保文字纯净
+                // 1. 清洗机制：先洗干净文本后缀，防重叠
                 let currentText = btn.innerText;
                 currentText = currentText.replace("  (✅)", "").replace(" (✅)", "");
                 
-                // 重新干净利落地只加一个
+                // 2. 重新利落地追加一个打勾小标
                 btn.innerText = currentText + "  (✅)";
                 
-                // 彻底强行绿显正确答案（不受黑夜白天任何样式干扰）
-                btn.style.setProperty('background', '#2ecc71', 'important');
-                btn.style.setProperty('color', 'white', 'important');
-                btn.style.setProperty('border-color', '#2ecc71', 'important');
+                // 3. 🚨 核心改动：不再强制覆盖绿色背景（.style.background = "#2ecc71" 已被拔除）
+                // 仅给正确选项加粗文字并微调边框色，让它完全契合你的 CSS（无论是白底还是黑底）
                 btn.style.fontWeight = "bold";
+                if (!btn.classList.contains('selected')) {
+                    btn.style.borderColor = "#2ecc71"; // 为未选中的正确项添一圈绿框进行暗示
+                }
             }
         });
     });
