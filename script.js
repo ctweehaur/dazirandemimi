@@ -98,10 +98,17 @@ function renderMultipleChoiceQuizzes() {
     // 初始化状态
     userSelectedAnswers = {};
     document.getElementById('quizResultScore').style.display = "none";
-    const submitBtn = document.getElementById('submitQuizBtn');
-    submitBtn.disabled = false;
-    submitBtn.style.background = "#34495e";
-    submitBtn.innerText = "提交检查 🚀";
+    document.getElementById('quizStatusMessage').style.display = "none";
+    document.getElementById('quizStatusMessage').innerText = "";
+
+    // 恢复三个控制按钮的初始显隐状态
+    document.getElementById('submitQuizBtn').style.display = "inline-block";
+    document.getElementById('submitQuizBtn').disabled = false;
+    document.getElementById('submitQuizBtn').style.background = "#34495e";
+    document.getElementById('submitQuizBtn').innerText = "提交答案 🚀";
+    
+    document.getElementById('retryQuizBtn').style.display = "none";
+    document.getElementById('checkQuizBtn').style.display = "none";
 
     quizDataList.forEach((q) => {
         const qBox = document.createElement('div');
@@ -158,6 +165,8 @@ function renderMultipleChoiceQuizzes() {
 
             // 🎯 点击事件：纯粹的高级国风蓝强力高亮，拒绝剧透对错
             btn.onclick = () => {
+                if (btn.disabled) return; // 被锁定时无法点击
+                
                 Array.from(optionsBox.children).forEach(b => {
                     b.classList.remove('selected');
                     b.style.background = "#fff";
@@ -186,16 +195,88 @@ function renderMultipleChoiceQuizzes() {
     });
 }
 
-// 🚀 全局结算批改器：一次性核对并揭晓全卷对错
-function submitAllAnswers() {
+// 📌 【新流程 1/3】：点击“提交答案”按钮
+function submitAnswersOnly() {
     const totalQuestions = quizDataList.length;
     const answeredCount = Object.keys(userSelectedAnswers).length;
 
+    // 老师先卡一波有没有做完题目
     if (answeredCount < totalQuestions) {
         alert(`⚠️ 老师发现你还有未填完的习题哦！目前完成了 (${answeredCount} / ${totalQuestions}) 题。`);
         return;
     }
 
+    // 1. 锁死所有题目按钮，不准再改
+    const allButtons = document.querySelectorAll('.quiz-choice-btn');
+    allButtons.forEach(btn => btn.disabled = true);
+
+    // 2. 显示中转状态提示
+    const statusMsg = document.getElementById('quizStatusMessage');
+    statusMsg.style.display = "block";
+    statusMsg.innerText = "🚀 答案已成功锁定！你可以选择【重新作答】再试一次，或者直接点击【检查答案】。";
+
+    // 3. 按钮状态切换：隐藏自己，放出来两个新动作按钮
+    document.getElementById('submitQuizBtn').style.display = "none";
+    document.getElementById('retryQuizBtn').style.display = "inline-block";
+    document.getElementById('checkQuizBtn').style.display = "inline-block";
+}
+
+// 📌 【新流程 2/3】：点击“重新作答”按钮
+function retryQuizAnswers() {
+    // 1. 解锁所有选择题按钮，清空选中样式状态
+    const allButtons = document.querySelectorAll('.quiz-choice-btn');
+    allButtons.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('selected');
+        btn.style.background = "#fff";
+        btn.style.borderColor = "#dcdde1";
+        btn.style.color = "inherit";
+        btn.style.fontWeight = "normal";
+        btn.style.boxShadow = "none";
+        
+        // 恢复原本的文字内容（洗掉之前check可能残存的对错后缀）
+        if (btn.innerText.includes(" (✅️)")) {
+            btn.innerText = btn.innerText.replace(" (✅️)", "");
+        }
+        if (btn.innerText.includes(" (❌️)")) {
+            btn.innerText = btn.innerText.replace(" (❌️)", "");
+        }
+    });
+
+    // 2. 重置清空答案内存缓存
+    userSelectedAnswers = {};
+
+    // 3. 隐藏并收起所有的结果、计分板和提示
+    document.getElementById('quizStatusMessage').style.display = "none";
+    document.getElementById('quizStatusMessage').innerText = "";
+    document.getElementById('quizResultScore').style.display = "none";
+
+    // 4. 按钮回到最初状态：显示提交答案，收起重来和检查
+    document.getElementById('submitQuizBtn').style.display = "inline-block";
+    document.getElementById('submitQuizBtn').disabled = false;
+    document.getElementById('submitQuizBtn').style.background = "#34495e";
+    document.getElementById('submitQuizBtn').innerText = "提交答案 🚀";
+
+    document.getElementById('retryQuizBtn').style.display = "none";
+    document.getElementById('checkQuizBtn').style.display = "none";
+}
+
+// 📌 【新流程 3/3】：点击“检查答案”按钮
+function checkQuizAnswersReal() {
+    // 1. 关闭中间过渡提示
+    document.getElementById('quizStatusMessage').style.display = "none";
+    
+    // 2. 隐藏重新作答和检查答案按钮
+    document.getElementById('retryQuizBtn').style.display = "none";
+    document.getElementById('checkQuizBtn').style.display = "none";
+
+    // 3. 执行网页原本的核心底层全自动阅卷判分算法
+    submitAllAnswers();
+}
+
+// 🚀 全局结算批改器：一次性核对并揭晓全卷对错 (此部分保留您最完美的阅卷和着色逻辑)
+function submitAllAnswers() {
+    const totalQuestions = quizDataList.length;
     let score = 0;
 
     quizDataList.forEach(q => {
@@ -252,7 +333,9 @@ function submitAllAnswers() {
     resultBox.style.display = "block";
     resultBox.innerHTML = `🎉 批改完成！您的最终得分是：<span style="font-size: 24px; color: #e67e22;">${score}</span> / ${totalQuestions} 分`;
     
+    // 隐藏主提交按钮，统一流线
     const submitBtn = document.getElementById('submitQuizBtn');
+    submitBtn.style.display = "inline-block";
     submitBtn.disabled = true;
     submitBtn.style.background = "#95a5a6";
     submitBtn.innerText = "已完成提交";
