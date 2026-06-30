@@ -424,10 +424,10 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(41, 128, 185, 0.18) !important;
 }
 
-/* 💡 新增：日间模式下正确答案的淡淡绿圈暗示 */
-.quiz-choice-btn.correct-answer-hint {
-    border: 1px solid #2ecc71 !important; 
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.15) !important; 
+/* 💡 日间模式下正确答案的淡淡绿圈暗示（仅在未被学生选中时触发，杜绝重叠） */
+.quiz-choice-btn.correct-answer-hint:not(.selected) {
+    border: 1.5px solid #2ecc71 !important; 
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.1) !important; 
 }
 
 /* 🌟 🌙 暗黑模式下的无缝换肤接管 */
@@ -456,10 +456,10 @@ ruby:hover, ruby.is-active {
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3) !important;
 }
 
-/* 💡 新增：暗黑模式下正确答案的淡淡绿圈暗示 */
-[data-theme="dark"] .quiz-choice-btn.correct-answer-hint {
-    border: 1px solid #2ecc71 !important; 
-    box-shadow: 0 0 8px rgba(46, 204, 113, 0.25) !important;
+/* 💡 暗黑模式下未选中正确答案的淡淡绿圈暗示 */
+[data-theme="dark"] .quiz-choice-btn.correct-answer-hint:not(.selected) {
+    border: 1.5px solid #2ecc71 !important; 
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.2) !important;
 }
 
 /* ==========================================================================
